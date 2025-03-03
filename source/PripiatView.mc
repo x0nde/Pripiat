@@ -1,0 +1,147 @@
+import Toybox.Application;
+import Toybox.Graphics;
+import Toybox.Lang;
+import Toybox.System;
+import Toybox.WatchUi;
+
+class PripiatView extends WatchUi.WatchFace {
+    var width = 0;
+    var height = 0;
+    var centerX = 0;
+    var centerY = 0;
+    var radius = 0;
+    var rotationOffset = Math.PI / 2; // Make 0 the top value instead of pi/2.
+    var font20 = null;
+
+    /* -------- CORE FUNCTIONS -------- */
+    function initialize() {
+        WatchFace.initialize();
+    }
+
+    // Load your resources here
+    function onLayout(dc as Dc) as Void {
+        width = dc.getWidth();
+        height = dc.getHeight();
+        centerX = width / 2;
+        centerY = width / 2;
+        radius = centerY;
+        if (centerX <= centerY) { // Math.min
+            radius = centerX;
+        }
+        // radius = radius * 0.97; // x% decrease.
+        font20 = Graphics.getVectorFont({:face=>["RobotoRegular"], :size=>20});
+    }
+
+    // Called when this View is brought to the foreground. Restore
+    // the state of this View and prepare it to be shown. This includes
+    // loading resources into memory.
+    function onShow() as Void {
+    }
+
+    // Update the view
+    function onUpdate(dc as Dc) as Void {
+        dc.setColor(Graphics.COLOR_BLACK, Graphics.COLOR_BLACK);
+        dc.clear();
+        
+        // Enable antialiasing
+        dc.setAntiAlias(true);
+
+        // Draw the clock face
+        drawClockFace(dc);
+
+        // Draw the hands
+        drawHands(dc);
+    }
+
+    // Called when this View is removed from the screen. Save the
+    // state of this View here. This includes freeing resources from
+    // memory.
+    function onHide() as Void {
+    }
+
+    // The user has just looked at their watch. Timers and animations may be started here.
+    function onExitSleep() as Void {
+    }
+
+    // Terminate any active timers and prepare for slow updates.
+    function onEnterSleep() as Void {
+    }
+
+    /* -------- AUX FUNCTIONS -------- */
+    function drawClockFace(dc) as Void {
+        // Draw 60 ticks
+        for (var i = 0; i < 60; i++) {
+            var angle = i * Math.PI / 30 - (Math.PI / 2); // Convert tick number to radians with 90 dregrees rotation
+            
+            // Draw numbers at 5, 15, 25, 35, 45, 55
+            if (i % 5 == 0 && i % 10 != 0) {
+                var number = i;
+                var text = number.format("%02d");
+                var textHeight = dc.getFontHeight(font20);
+                dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
+                dc.drawRadialText(centerX, centerY, font20, text, Graphics.TEXT_JUSTIFY_CENTER,convertRadian(angle)*-1, radius - textHeight + 2, 0);
+            } else {
+                var tickLength = radius * 0.1; // Default tick length
+                var tickWidth = 1; // Default tick width
+                if (i % 5 == 0) {
+                    tickLength = radius * 0.15; // Longer ticks for hour markers
+                    tickWidth = 3; // Thicker ticks for hour markers
+                }
+
+                var startX = centerX + (radius * Math.cos(angle));
+                var startY = centerY + (radius * Math.sin(angle));
+                var endX = centerX + ((radius - tickLength) * Math.cos(angle));
+                var endY = centerY + ((radius - tickLength) * Math.sin(angle));
+
+                dc.setPenWidth(tickWidth);
+                dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
+                dc.drawLine(startX, startY, endX, endY);
+            }
+        }
+    }
+
+    function drawHands(dc) as Void {
+        var time = System.getClockTime();
+        var hours = time.hour % 12;
+        var minutes = time.min;
+        var seconds = time.sec;
+
+        // Calculate hand angles
+        var hourAngle = (hours + minutes / 60.0) * Math.PI / 6;
+        var minuteAngle = minutes * Math.PI / 30;
+        var secondAngle = seconds * Math.PI / 30;
+
+        // Draw hour hand
+        var hourLength = radius * 0.5;
+        var hourEndX = centerX + (hourLength * Math.cos(hourAngle - Math.PI / 2));
+        var hourEndY = centerY + (hourLength * Math.sin(hourAngle - Math.PI / 2));
+        dc.setPenWidth(6);
+        dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
+        dc.drawLine(centerX, centerY, hourEndX, hourEndY);
+
+        // Draw minute hand
+        var minuteLength = radius * 0.7;
+        var minuteEndX = centerX + (minuteLength * Math.cos(minuteAngle - Math.PI / 2));
+        var minuteEndY = centerY + (minuteLength * Math.sin(minuteAngle - Math.PI / 2));
+        dc.setPenWidth(4);
+        dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
+        dc.drawLine(centerX, centerY, minuteEndX, minuteEndY);
+
+        // Draw second hand
+        var secondLength = radius * 0.8;
+        var secondEndX = centerX + (secondLength * Math.cos(secondAngle - Math.PI / 2));
+        var secondEndY = centerY + (secondLength * Math.sin(secondAngle - Math.PI / 2));
+        dc.setPenWidth(2);
+        dc.setColor(Graphics.COLOR_RED, Graphics.COLOR_TRANSPARENT);
+        dc.drawLine(centerX, centerY, secondEndX, secondEndY);
+
+        // Draw center dot
+        dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
+        dc.fillCircle(centerX, centerY, 5);
+    }
+
+    /* -------- STATIC FUNCTIONS -------- */
+    function convertRadian(angle) {
+        return angle * 180 / Math.PI;
+    }
+}
