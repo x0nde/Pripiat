@@ -12,6 +12,10 @@ class PripiatView extends WatchUi.WatchFace {
     var radius = 0;
     var rotationOffset = Math.PI / 2; // Make 0 the top value instead of pi/2.
     var font20 = null;
+    var font20Height = 0;
+    var palette1 = null;
+    var palette2 = null;
+    var palette3 = null;
 
     /* -------- CORE FUNCTIONS -------- */
     function initialize() {
@@ -30,6 +34,10 @@ class PripiatView extends WatchUi.WatchFace {
         }
         // radius = radius * 0.97; // x% decrease.
         font20 = Graphics.getVectorFont({:face=>["RobotoRegular"], :size=>20});
+        font20Height = dc.getFontHeight(font20);
+        palette1 = Graphics.COLOR_BLUE; // Graphics.COLOR_WHITE; or Graphics.COLOR_GREEN;
+        palette2 = Graphics.COLOR_RED;
+        palette3 = Graphics.COLOR_WHITE;
     }
 
     // Called when this View is brought to the foreground. Restore
@@ -77,15 +85,16 @@ class PripiatView extends WatchUi.WatchFace {
             if (i % 5 == 0 && i % 10 != 0) {
                 var number = i;
                 var text = number.format("%02d");
-                var textHeight = dc.getFontHeight(font20);
-                dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
-                dc.drawRadialText(centerX, centerY, font20, text, Graphics.TEXT_JUSTIFY_CENTER,convertRadian(angle)*-1, radius - textHeight + 2, 0);
+                dc.setColor(palette1, Graphics.COLOR_TRANSPARENT);
+                dc.drawRadialText(centerX, centerY, font20, text, Graphics.TEXT_JUSTIFY_CENTER,convertRadian(angle)*-1, radius - font20Height + 3, 0);
+            } else if (i == 10 || i == 29 || i == 30 || i ==  31) { // Skip these for making room.
+                continue;
             } else {
-                var tickLength = radius * 0.1; // Default tick length
+                var tickLength = radius * 0.07; // Default tick length
                 var tickWidth = 1; // Default tick width
                 if (i % 5 == 0) {
-                    tickLength = radius * 0.15; // Longer ticks for hour markers
-                    tickWidth = 3; // Thicker ticks for hour markers
+                    tickLength = radius * 0.08; // Longer ticks for hour markers
+                    tickWidth = 4; // Thicker ticks for hour markers
                 }
 
                 var startX = centerX + (radius * Math.cos(angle));
@@ -94,10 +103,28 @@ class PripiatView extends WatchUi.WatchFace {
                 var endY = centerY + ((radius - tickLength) * Math.sin(angle));
 
                 dc.setPenWidth(tickWidth);
-                dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
+                dc.setColor(palette1, Graphics.COLOR_TRANSPARENT);
                 dc.drawLine(startX, startY, endX, endY);
             }
         }
+        
+        // Text at the bottom.
+        dc.drawText(centerX, height - font20Height - 1, font20, "RobCo", Graphics.TEXT_JUSTIFY_CENTER);
+        // Two red lines in the 10" mark.
+        var angle = 10 * Math.PI / 30 - (Math.PI / 2);
+        var tickLength = radius * 0.07;
+        dc.setPenWidth(3);
+        dc.setColor(palette2, Graphics.COLOR_TRANSPARENT);
+        var startX = centerX + (radius * Math.cos(angle-0.02));
+        var startY = centerY + (radius * Math.sin(angle-0.02));
+        var endX = centerX + ((radius - tickLength) * Math.cos(angle-0.02));
+        var endY = centerY + ((radius - tickLength) * Math.sin(angle-0.02));
+        dc.drawLine(startX, startY, endX, endY);
+        startX = centerX + (radius * Math.cos(angle+0.02));
+        startY = centerY + (radius * Math.sin(angle+0.02));
+        endX = centerX + ((radius - tickLength) * Math.cos(angle+0.02));
+        endY = centerY + ((radius - tickLength) * Math.sin(angle+0.02));
+        dc.drawLine(startX, startY, endX, endY);
     }
 
     function drawHands(dc) as Void {
@@ -116,7 +143,7 @@ class PripiatView extends WatchUi.WatchFace {
         var hourEndX = centerX + (hourLength * Math.cos(hourAngle - Math.PI / 2));
         var hourEndY = centerY + (hourLength * Math.sin(hourAngle - Math.PI / 2));
         dc.setPenWidth(6);
-        dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
+        dc.setColor(palette1, Graphics.COLOR_TRANSPARENT);
         dc.drawLine(centerX, centerY, hourEndX, hourEndY);
 
         // Draw minute hand
@@ -124,7 +151,7 @@ class PripiatView extends WatchUi.WatchFace {
         var minuteEndX = centerX + (minuteLength * Math.cos(minuteAngle - Math.PI / 2));
         var minuteEndY = centerY + (minuteLength * Math.sin(minuteAngle - Math.PI / 2));
         dc.setPenWidth(4);
-        dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
+        dc.setColor(palette1, Graphics.COLOR_TRANSPARENT);
         dc.drawLine(centerX, centerY, minuteEndX, minuteEndY);
 
         // Draw second hand
@@ -132,11 +159,11 @@ class PripiatView extends WatchUi.WatchFace {
         var secondEndX = centerX + (secondLength * Math.cos(secondAngle - Math.PI / 2));
         var secondEndY = centerY + (secondLength * Math.sin(secondAngle - Math.PI / 2));
         dc.setPenWidth(2);
-        dc.setColor(Graphics.COLOR_RED, Graphics.COLOR_TRANSPARENT);
+        dc.setColor(palette2, Graphics.COLOR_TRANSPARENT);
         dc.drawLine(centerX, centerY, secondEndX, secondEndY);
 
         // Draw center dot
-        dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
+        dc.setColor(palette1, Graphics.COLOR_TRANSPARENT);
         dc.fillCircle(centerX, centerY, 5);
     }
 
