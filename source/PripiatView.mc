@@ -186,7 +186,7 @@ class PripiatView extends WatchUi.WatchFace {
         ];
 
         // Draw the progress bars
-        drawProgressBar(dc, useOffset ? angles[0][0] - offset : angles[0][0], useOffset ? angles[0][1] - offset : angles[0][1], 0, 30);
+        drawProgressBar(dc, useOffset ? angles[0][0] - offset : angles[0][0], useOffset ? angles[0][1] - offset : angles[0][1], 0, 21);
         drawProgressBar(dc, useOffset ? angles[1][0] - offset : angles[1][0], useOffset ? angles[1][1] - offset : angles[1][1], 80, 101);
         drawProgressBar(dc, useOffset ? angles[2][0] - offset : angles[2][0], useOffset ? angles[2][1] - offset : angles[2][1], 0, 0);
     }
@@ -200,6 +200,12 @@ class PripiatView extends WatchUi.WatchFace {
         dc.setColor(palette1, Graphics.COLOR_TRANSPARENT);
         dc.setPenWidth(barWidth);
         dc.drawArc(centerX, centerY, barRadius, Graphics.ARC_CLOCKWISE, startAngle, endAngle);
+        if (altColorStart != 0 || altColorEnd != 0) {
+            dc.setColor(palette2, Graphics.COLOR_TRANSPARENT);
+            var altArcStart = startAngle - 80*altColorStart/100.0;
+            var altArcEnd = startAngle - (80 * ((altColorEnd-1))/100);
+            dc.drawArc(centerX, centerY, barRadius, Graphics.ARC_CLOCKWISE, altArcStart, altArcEnd);
+        }
 
         var radianStart = degreesToRadians(startAngle);
         var radianEnd = degreesToRadians(endAngle);
