@@ -16,6 +16,7 @@ class PripiatView extends WatchUi.WatchFace {
     var font17 = null;
     var font17Height = 0;
     var ledFont = null;
+    var ledFontBig = null;
     var ledFontSmol = null;
     var palette1 = null;
     var palette1dark = null;
@@ -40,6 +41,7 @@ class PripiatView extends WatchUi.WatchFace {
         }
         // radius = radius * 0.97; // x% decrease.
         ledFont = Application.loadResource( Rez.Fonts.id_led );
+        ledFontBig = Application.loadResource( Rez.Fonts.id_led_big );
         ledFontSmol = Application.loadResource( Rez.Fonts.id_smol );
         font20 = Graphics.getVectorFont({:face=>["RobotoRegular"], :size=>20});
         font20Height = dc.getFontHeight(font20);
@@ -66,10 +68,10 @@ class PripiatView extends WatchUi.WatchFace {
         dc.setAntiAlias(true);
 
         drawClockFace(dc);
-        drawHands(dc);
         drawProgressBars(dc);
         drawDate(dc);
         drawMetrics(dc);
+        drawHands(dc);
     }
 
     // Called when this View is removed from the screen. Save the
@@ -299,7 +301,7 @@ class PripiatView extends WatchUi.WatchFace {
         var auxRadius = radius * 0.72;  // Radius of the progress bars
         var angles = [180, 0]; // Angles in the same height.
         var xOffset = 60;
-        var yOffset = -10;
+        var yOffset = 13;
         var hrYOffset = 65;
         var textYOffset = 10;
 
@@ -319,10 +321,11 @@ class PripiatView extends WatchUi.WatchFace {
         dc.drawText(centerX, centerY + hrYOffset, ledFont, "0243", Graphics.TEXT_JUSTIFY_CENTER);
 
         // Text.
-        dc.setColor(palette1light, Graphics.COLOR_TRANSPARENT);
+        dc.setColor(palette1, Graphics.COLOR_TRANSPARENT);
         dc.drawText(points[0][0]+xOffset+2, y - textYOffset, ledFontSmol, "DLY CALORIES:", Graphics.TEXT_JUSTIFY_LEFT);
         dc.drawText(points[1][0]-xOffset, y - textYOffset, ledFontSmol, "KM TODAY:", Graphics.TEXT_JUSTIFY_RIGHT);
         dc.drawText(centerX, centerY + hrYOffset - textYOffset, ledFontSmol, "LIVE HR:", Graphics.TEXT_JUSTIFY_CENTER);
+        dc.drawText(centerX, centerY - 1.5*hrYOffset, ledFontBig, "&", Graphics.TEXT_JUSTIFY_CENTER);
     }
 
     /* -------- STATIC FUNCTIONS -------- */
