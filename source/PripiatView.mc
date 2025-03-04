@@ -16,10 +16,13 @@ class PripiatView extends WatchUi.WatchFace {
     var font17 = null;
     var font17Height = 0;
     var ledFont = null;
+    var ledFontSmall = null;
     var ledFontBig = null;
     var ledFontSmol = null;
+    var ledFontStorre = null;
     var palette1 = null;
     var palette1dark = null;
+    var palette1darker = null;
     var palette1light = null;
     var palette2 = null;
     var palette2dark = null;
@@ -41,8 +44,10 @@ class PripiatView extends WatchUi.WatchFace {
         }
         // radius = radius * 0.97; // x% decrease.
         ledFont = Application.loadResource( Rez.Fonts.id_led );
+        ledFontSmall = Application.loadResource( Rez.Fonts.id_led_small );
         ledFontBig = Application.loadResource( Rez.Fonts.id_led_big );
         ledFontSmol = Application.loadResource( Rez.Fonts.id_smol );
+        ledFontStorre = Application.loadResource( Rez.Fonts.id_storre );
         font20 = Graphics.getVectorFont({:face=>["RobotoRegular"], :size=>20});
         font20Height = dc.getFontHeight(font20);
         font17 = Graphics.getVectorFont({:face=>["RobotoRegular"], :size=>17});
@@ -50,6 +55,7 @@ class PripiatView extends WatchUi.WatchFace {
         palette1 = Graphics.COLOR_BLUE; // Graphics.COLOR_WHITE; or Graphics.COLOR_GREEN;
         // palette1dark = Graphics.COLOR_DK_BLUE;
         palette1dark = Graphics.createColor(255, 41, 91, 255);
+        palette1darker = Graphics.createColor(255, 0, 0, 120);
         palette1light = Graphics.createColor(255, 135, 173, 247);
         palette2 = Graphics.COLOR_RED;
         palette2dark = Graphics.COLOR_DK_RED;
@@ -177,7 +183,7 @@ class PripiatView extends WatchUi.WatchFace {
         dc.drawLine(centerX, centerY, minuteEndX, minuteEndY);
 
         // Draw second hand
-        var secondLength = radius * 0.56;
+        var secondLength = radius * 0.54;
         var secondEndX = centerX + (secondLength * Math.cos(secondAngle - rotationOffset));
         var secondEndY = centerY + (secondLength * Math.sin(secondAngle - rotationOffset));
         dc.setPenWidth(2);
@@ -287,7 +293,7 @@ class PripiatView extends WatchUi.WatchFace {
     function drawDate(dc) as Void {
         var auxRadius = radius * 0.72;  // Radius of the progress bars
         var angles = [220, 320]; // Angles in the same height.
-        var yOffset = 20;
+        var yOffset = 17;
 
         var points = lineFromAngles(auxRadius, angles[0], angles[1]);
         var x = (points[0][0]+ points[1][0])/2;
@@ -300,31 +306,31 @@ class PripiatView extends WatchUi.WatchFace {
     function drawMetrics(dc) as Void {
         var auxRadius = radius * 0.72;  // Radius of the progress bars
         var angles = [180, 0]; // Angles in the same height.
-        var xOffset = 60;
+        var xOffset = 50;
         var yOffset = 13;
         var hrYOffset = 65;
-        var textYOffset = 10;
+        var textYOffset = 13;
 
         var points = lineFromAngles(auxRadius, angles[0], angles[1]);
         var y = points[0][1] - yOffset;
 
         // Backgrounds.
-        dc.setColor(palette1dark, Graphics.COLOR_TRANSPARENT);
-        dc.drawText(points[0][0]+xOffset, y, ledFont, "####", Graphics.TEXT_JUSTIFY_LEFT);
-        dc.drawText(points[1][0]-xOffset, y, ledFont, "####", Graphics.TEXT_JUSTIFY_RIGHT);
-        dc.drawText(centerX, centerY + hrYOffset, ledFont, "####", Graphics.TEXT_JUSTIFY_CENTER);
+        dc.setColor(palette1darker, Graphics.COLOR_TRANSPARENT);
+        dc.drawText(points[0][0]+xOffset, y, ledFontBig, "####", Graphics.TEXT_JUSTIFY_LEFT);
+        dc.drawText(points[1][0]-xOffset, y, ledFontBig, "####", Graphics.TEXT_JUSTIFY_RIGHT);
+        dc.drawText(centerX, centerY + hrYOffset, ledFontBig, "####", Graphics.TEXT_JUSTIFY_CENTER);
 
         // Values.
         dc.setColor(palette1light, Graphics.COLOR_TRANSPARENT);
-        dc.drawText(points[0][0]+xOffset, y, ledFont, "1293", Graphics.TEXT_JUSTIFY_LEFT);
-        dc.drawText(points[1][0]-xOffset, y, ledFont, "4.32", Graphics.TEXT_JUSTIFY_RIGHT);
-        dc.drawText(centerX, centerY + hrYOffset, ledFont, "0243", Graphics.TEXT_JUSTIFY_CENTER);
+        dc.drawText(points[0][0]+xOffset, y, ledFontBig, "1293", Graphics.TEXT_JUSTIFY_LEFT);
+        dc.drawText(points[1][0]-xOffset, y, ledFontBig, "4.32", Graphics.TEXT_JUSTIFY_RIGHT);
+        dc.drawText(centerX, centerY + hrYOffset, ledFontBig, "0243", Graphics.TEXT_JUSTIFY_CENTER);
 
         // Text.
         dc.setColor(palette1, Graphics.COLOR_TRANSPARENT);
-        dc.drawText(points[0][0]+xOffset+2, y - textYOffset, ledFontSmol, "DLY CALORIES:", Graphics.TEXT_JUSTIFY_LEFT);
-        dc.drawText(points[1][0]-xOffset, y - textYOffset, ledFontSmol, "KM TODAY:", Graphics.TEXT_JUSTIFY_RIGHT);
-        dc.drawText(centerX, centerY + hrYOffset - textYOffset, ledFontSmol, "LIVE HR:", Graphics.TEXT_JUSTIFY_CENTER);
+        dc.drawText(points[0][0]+xOffset+2, y - textYOffset, ledFontStorre, "DLY CALORIES:", Graphics.TEXT_JUSTIFY_LEFT);
+        dc.drawText(points[1][0]-xOffset, y - textYOffset, ledFontStorre, "KM TODAY:", Graphics.TEXT_JUSTIFY_RIGHT);
+        dc.drawText(centerX, centerY + hrYOffset - textYOffset, ledFontStorre, "LIVE HR:", Graphics.TEXT_JUSTIFY_CENTER);
         dc.drawText(centerX, centerY - 1.5*hrYOffset, ledFontBig, "&", Graphics.TEXT_JUSTIFY_CENTER);
     }
 

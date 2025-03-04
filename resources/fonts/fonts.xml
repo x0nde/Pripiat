@@ -6,4 +6,5 @@
     <font id="id_led_big" filename="led_big.fnt" antialias="false" />
     <font id="id_smol" filename="smol.fnt" antialias="false" />
     <font id="id_xsmol" filename="xsmol.fnt" antialias="false" />
+    <font id="id_storre" filename="storre.fnt" antialias="false" />
 </fonts>
