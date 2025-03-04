@@ -79,6 +79,11 @@ class PripiatView extends WatchUi.WatchFace {
         dc.setAntiAlias(true);
     }
 
+    function onSettingsChanged() {
+        getSettings();
+        setColorTheme();
+    }
+
     // Called when this View is brought to the foreground. Restore
     // the state of this View and prepare it to be shown. This includes
     // loading resources into memory.
@@ -113,6 +118,8 @@ class PripiatView extends WatchUi.WatchFace {
 
     // The user has just looked at their watch. Timers and animations may be started here.
     function onExitSleep() as Void {
+        getSettings();
+        setColorTheme();
     }
 
     // Terminate any active timers and prepare for slow updates.
