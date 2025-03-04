@@ -1,6 +1,8 @@
+import Toybox.ActivityMonitor;
 import Toybox.Application;
 import Toybox.Graphics;
 import Toybox.Lang;
+import Toybox.SensorHistory;
 import Toybox.System;
 import Toybox.WatchUi;
 
@@ -10,7 +12,9 @@ class PripiatView extends WatchUi.WatchFace {
     var centerX = 0;
     var centerY = 0;
     var radius = 0;
+    var innerRadius = 0;
     var rotationOffset = Math.PI / 2.0; // Make 0 the top value instead of pi/2.
+    
     var font20 = null;
     var font20Height = 0;
     var font17 = null;
@@ -20,12 +24,21 @@ class PripiatView extends WatchUi.WatchFace {
     var ledFontBig = null;
     var ledFontSmol = null;
     var ledFontStorre = null;
+
     var palette1 = null;
     var palette1dark = null;
     var palette1darker = null;
     var palette1light = null;
     var palette2 = null;
     var palette2dark = null;
+
+    var bodyBat = 0;
+    var stress = 0;
+    var step = 0;
+    var stepGoal = 0;
+    var calories = "";
+    var distance = "";
+    var heartRate = "";
 
     /* -------- CORE FUNCTIONS -------- */
     function initialize() {
@@ -42,6 +55,7 @@ class PripiatView extends WatchUi.WatchFace {
         if (centerX <= centerY) { // Math.min
             radius = centerX;
         }
+        innerRadius = radius * 0.72;
         // radius = radius * 0.97; // x% decrease.
         ledFont = Application.loadResource( Rez.Fonts.id_led );
         ledFontSmall = Application.loadResource( Rez.Fonts.id_led_small );
@@ -72,6 +86,8 @@ class PripiatView extends WatchUi.WatchFace {
         dc.setColor(Graphics.COLOR_BLACK, Graphics.COLOR_BLACK);
         dc.clear();
         dc.setAntiAlias(true);
+
+        updateMetrics();
 
         drawClockFace(dc);
         drawProgressBars(dc);
@@ -204,14 +220,13 @@ class PripiatView extends WatchUi.WatchFace {
         ];
 
         // Draw the progress bars
-        drawProgressBar(dc, angles[0][0], angles[0][1], 0, 21, 33);
-        drawProgressBar(dc, angles[1][0], angles[1][1], 80, 101, 50);
-        drawProgressBar(dc, angles[2][0], angles[2][1], 0, 0, 78);
+        drawProgressBar(dc, angles[0][0], angles[0][1], 0, 21, bodyBat);
+        drawProgressBar(dc, angles[1][0], angles[1][1], 80, 101, stress);
+        drawProgressBar(dc, angles[2][0], angles[2][1], 0, 0, 100.0 * step / stepGoal);
     }
 
     function drawProgressBar(dc, startAngle, endAngle, altColorStart, altColorEnd, fill) as Void { // start always have to be greater to simplify math.
-        var barRadius = radius * 0.72;  // Radius of the progress bars
-        var tickLength = barRadius * 0.05; // Length of the ticks
+        var tickLength = innerRadius * 0.05; // Length of the ticks
         var radianStart = degreesToRadians(startAngle);
         var radianEnd = degreesToRadians(endAngle);
         var tickAngle, tickX, tickY, textAngle, text;
@@ -225,8 +240,8 @@ class PripiatView extends WatchUi.WatchFace {
             }
 
              // Calculate tick coordinates
-            tickX = centerX + ((barRadius + 10) * Math.cos(tickAngle));
-            tickY = centerY + ((barRadius + 10) * Math.sin(tickAngle));
+            tickX = centerX + ((innerRadius + 10) * Math.cos(tickAngle));
+            tickY = centerY + ((innerRadius + 10) * Math.sin(tickAngle));
 
             // Draw the tick
             dc.setColor(palette1dark, Graphics.COLOR_TRANSPARENT);
@@ -243,17 +258,17 @@ class PripiatView extends WatchUi.WatchFace {
             var altArcStart = startAngle - 80*altColorStart/100.0;
             var altArcEnd = startAngle - (80 * ((altColorEnd-1))/100);
             if (altArcStart < startAngle) {
-                dc.drawArc(centerX, centerY, barRadius, Graphics.ARC_CLOCKWISE, startAngle, altArcStart);
+                dc.drawArc(centerX, centerY, innerRadius, Graphics.ARC_CLOCKWISE, startAngle, altArcStart);
             }
             dc.setColor(palette2dark, Graphics.COLOR_TRANSPARENT);
-            dc.drawArc(centerX, centerY, barRadius, Graphics.ARC_CLOCKWISE, altArcStart, altArcEnd);
+            dc.drawArc(centerX, centerY, innerRadius, Graphics.ARC_CLOCKWISE, altArcStart, altArcEnd);
             if (altArcEnd > endAngle) {
                 dc.setColor(palette1, Graphics.COLOR_TRANSPARENT);
-                dc.drawArc(centerX, centerY, barRadius, Graphics.ARC_CLOCKWISE, altArcEnd, endAngle);
+                dc.drawArc(centerX, centerY, innerRadius, Graphics.ARC_CLOCKWISE, altArcEnd, endAngle);
             }
         } else {
             dc.setColor(palette1, Graphics.COLOR_TRANSPARENT);
-            dc.drawArc(centerX, centerY, barRadius, Graphics.ARC_CLOCKWISE, startAngle, endAngle);
+            dc.drawArc(centerX, centerY, innerRadius, Graphics.ARC_CLOCKWISE, startAngle, endAngle);
         }
 
         // Draw ticks and numbers
@@ -266,8 +281,8 @@ class PripiatView extends WatchUi.WatchFace {
             }
 
             // Calculate tick coordinates
-            tickX = centerX + (barRadius * Math.cos(tickAngle));
-            tickY = centerY + (barRadius * Math.sin(tickAngle));
+            tickX = centerX + (innerRadius * Math.cos(tickAngle));
+            tickY = centerY + (innerRadius * Math.sin(tickAngle));
 
             // Draw the tick
             dc.setColor(palette1, Graphics.COLOR_TRANSPARENT);
@@ -285,17 +300,16 @@ class PripiatView extends WatchUi.WatchFace {
                 if (i >= altColorStart && i < altColorEnd) {
                     dc.setColor(palette2, Graphics.COLOR_TRANSPARENT);
                 }
-                dc.drawRadialText(centerX, centerY, font17, text, Graphics.TEXT_JUSTIFY_CENTER, textAngle, barRadius - font17Height - 10, 0);
+                dc.drawRadialText(centerX, centerY, font17, text, Graphics.TEXT_JUSTIFY_CENTER, textAngle, innerRadius - font17Height - 10, 0);
             }
         }
     }
 
     function drawDate(dc) as Void {
-        var auxRadius = radius * 0.72;  // Radius of the progress bars
         var angles = [220, 320]; // Angles in the same height.
         var yOffset = 17;
 
-        var points = lineFromAngles(auxRadius, angles[0], angles[1]);
+        var points = lineFromAngles(innerRadius, angles[0], angles[1]);
         var x = (points[0][0]+ points[1][0])/2;
         var y = points[0][1] + yOffset;
 
@@ -304,14 +318,13 @@ class PripiatView extends WatchUi.WatchFace {
     }
 
     function drawMetrics(dc) as Void {
-        var auxRadius = radius * 0.72;  // Radius of the progress bars
         var angles = [180, 0]; // Angles in the same height.
         var xOffset = 50;
         var yOffset = 13;
         var hrYOffset = 65;
         var textYOffset = 13;
 
-        var points = lineFromAngles(auxRadius, angles[0], angles[1]);
+        var points = lineFromAngles(innerRadius, angles[0], angles[1]);
         var y = points[0][1] - yOffset;
 
         // Backgrounds.
@@ -322,9 +335,9 @@ class PripiatView extends WatchUi.WatchFace {
 
         // Values.
         dc.setColor(palette1light, Graphics.COLOR_TRANSPARENT);
-        dc.drawText(points[0][0]+xOffset, y, ledFontBig, "1293", Graphics.TEXT_JUSTIFY_LEFT);
-        dc.drawText(points[1][0]-xOffset, y, ledFontBig, "4.32", Graphics.TEXT_JUSTIFY_RIGHT);
-        dc.drawText(centerX, centerY + hrYOffset, ledFontBig, "0243", Graphics.TEXT_JUSTIFY_CENTER);
+        dc.drawText(points[0][0]+xOffset, y, ledFontBig, calories, Graphics.TEXT_JUSTIFY_LEFT);
+        dc.drawText(points[1][0]-xOffset, y, ledFontBig, distance, Graphics.TEXT_JUSTIFY_RIGHT);
+        dc.drawText(centerX, centerY + hrYOffset, ledFontBig, heartRate, Graphics.TEXT_JUSTIFY_CENTER);
 
         // Text.
         dc.setColor(palette1, Graphics.COLOR_TRANSPARENT);
@@ -332,6 +345,43 @@ class PripiatView extends WatchUi.WatchFace {
         dc.drawText(points[1][0]-xOffset, y - textYOffset, ledFontStorre, "KM TODAY:", Graphics.TEXT_JUSTIFY_RIGHT);
         dc.drawText(centerX, centerY + hrYOffset - textYOffset, ledFontStorre, "LIVE HR:", Graphics.TEXT_JUSTIFY_CENTER);
         dc.drawText(centerX, centerY - 1.5*hrYOffset, ledFontBig, "&", Graphics.TEXT_JUSTIFY_CENTER);
+    }
+
+    function updateMetrics() as Void {
+        if ((Toybox has :SensorHistory) && (Toybox.SensorHistory has :getBodyBatteryHistory) && (Toybox.SensorHistory has :getStressHistory)) {
+            var bbIterator = Toybox.SensorHistory.getBodyBatteryHistory({:period => 1});
+            var stIterator = Toybox.SensorHistory.getStressHistory({:period => 1});
+            var bb = bbIterator.next();
+            var st = stIterator.next();
+
+            if(bb != null) {
+                bodyBat = bb.data;
+            }
+            if(st != null) {
+                stress = st.data;
+            }
+        }
+        var monitorInfo = ActivityMonitor.getInfo();
+        var activityInfo = Activity.getActivityInfo();
+        step = monitorInfo.steps;
+        stepGoal = monitorInfo.stepGoal;
+        calories = monitorInfo.calories.format("%04d");
+        var km = monitorInfo.distance / 100000.0; // km / day.
+        if (km >= 10) {
+            distance = km.format("%.1f");
+        } else {
+            distance = km.format("%.2f");
+        }
+        var hrSample = activityInfo.currentHeartRate;
+        if (hrSample != null) {
+            heartRate = hrSample.format("%04d");
+        } else if (ActivityMonitor has :getHeartRateHistory) {
+            // Falling back to historical HR from ActivityMonitor
+            var hist = ActivityMonitor.getHeartRateHistory(1, /* newestFirst */ true).next();
+            if ((hist != null) && (hist.heartRate != ActivityMonitor.INVALID_HR_SAMPLE)) {
+                heartRate = hist.heartRate.format("%04d");
+            }
+        } 
     }
 
     /* -------- STATIC FUNCTIONS -------- */
