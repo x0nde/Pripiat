@@ -60,7 +60,7 @@ class PripiatView extends WatchUi.WatchFace {
         if (centerX <= centerY) { // Math.min
             radius = centerX;
         }
-        innerRadius = radius * 0.72;
+        innerRadius = radius * 0.75;
         // radius = radius * 0.97; // x% decrease.
         ledFont = Application.loadResource( Rez.Fonts.id_led );
         ledFontSmall = Application.loadResource( Rez.Fonts.id_led_small );
@@ -126,21 +126,16 @@ class PripiatView extends WatchUi.WatchFace {
         for (var i = 0; i < 60; i++) {
             var angle = i * Math.PI / 30.0 - rotationOffset; // Convert tick number to radians with 90 dregrees rotation
             
-            // Draw numbers at 5, 15, 25, 35, 45, 55
-            if (i % 5 == 0 && i % 10 != 0) {
+            if (i == 10 || i == 29 || i == 30 || i ==  31) { // Skip these for making room.
+                continue;
+            } else if (i % 5 == 0) { // Draw numbers at 5, 15, 25, 35, 45, 55.
                 var number = i;
                 var text = number.format("%02d");
                 dc.setColor(palette1, Graphics.COLOR_TRANSPARENT);
-                dc.drawRadialText(centerX, centerY, font20, text, Graphics.TEXT_JUSTIFY_CENTER,radiansToDegrees(angle), radius - font20Height + 2, 0);
-            } else if (i == 10 || i == 29 || i == 30 || i ==  31) { // Skip these for making room.
-                continue;
+                dc.drawRadialText(centerX, centerY, font20, text, Graphics.TEXT_JUSTIFY_CENTER, radiansToDegrees(angle + 2*Math.PI), radius - font20Height + 4, 0);
             } else {
                 var tickLength = radius * 0.07; // Default tick length
                 var tickWidth = 1; // Default tick width
-                if (i % 5 == 0) {
-                    tickLength = radius * 0.08; // Longer ticks for hour markers
-                    tickWidth = 4; // Thicker ticks for hour markers
-                }
 
                 var startX = centerX + (radius * Math.cos(angle));
                 var startY = centerY + (radius * Math.sin(angle));
@@ -155,6 +150,7 @@ class PripiatView extends WatchUi.WatchFace {
         
         // Text at the bottom.
         dc.setColor(palette1, Graphics.COLOR_TRANSPARENT);
+        dc.drawArc(centerX, centerY, radius*0.92, Graphics.ARC_CLOCKWISE, 0, 360);
         dc.drawText(centerX, height - font20Height - 1, font20, "RobCo", Graphics.TEXT_JUSTIFY_CENTER);
         // Two red lines in the 10" mark.
         var angle = 10 * Math.PI / 30.0 - rotationOffset;
@@ -193,7 +189,7 @@ class PripiatView extends WatchUi.WatchFace {
         dc.drawLine(centerX, centerY, hourEndX, hourEndY);
 
         // Draw minute hand
-        var minuteLength = radius * 0.5;
+        var minuteLength = radius * 0.55;
         var minuteEndX = centerX + (minuteLength * Math.cos(minuteAngle - rotationOffset));
         var minuteEndY = centerY + (minuteLength * Math.sin(minuteAngle - rotationOffset));
         dc.setPenWidth(4);
@@ -228,34 +224,36 @@ class PripiatView extends WatchUi.WatchFace {
     }
 
     function drawProgressBar(dc, startAngle, endAngle, altColorStart, altColorEnd, fill) as Void { // start always have to be greater to simplify math.
-        var tickLength = innerRadius * 0.05; // Length of the ticks
-        var radianStart = degreesToRadians(startAngle);
-        var radianEnd = degreesToRadians(endAngle);
-        var tickAngle, tickX, tickY, textAngle, text;
+        var radianStart = degreesToRadians(startAngle + 360);
+        var radianEnd = degreesToRadians(endAngle + 360);
+        var tickLength, tickAngle, tickX, tickY, tickXend, tickYend, textAngle, text;
         
-        // Draw progress ticks.
-        dc.setPenWidth(1);
-        for (var i = 0; i <= 100; i += 2.5) {
+        // Draw external progress ticks.
+        dc.setPenWidth(3);
+        tickLength = 12;
+        for (var i = 0; i <= 100; i += 4) {
             tickAngle = radianStart + (radianEnd - radianStart) * (i / 100.0);
             if (tickAngle > 2 * Math.PI) {
                 tickAngle = tickAngle - 2 * Math.PI;
             }
 
              // Calculate tick coordinates
-            tickX = centerX + ((innerRadius + 10) * Math.cos(tickAngle));
-            tickY = centerY + ((innerRadius + 10) * Math.sin(tickAngle));
+            tickX = centerX + ((innerRadius + tickLength) * Math.cos(tickAngle));
+            tickY = centerY + ((innerRadius + tickLength) * Math.sin(tickAngle));
+            tickXend = centerX + (innerRadius * Math.cos(tickAngle));
+            tickYend = centerY + (innerRadius * Math.sin(tickAngle));
 
             // Draw the tick
             dc.setColor(palette1dark, Graphics.COLOR_TRANSPARENT);
             if (i <= fill) {
                 dc.setColor(palette1light, Graphics.COLOR_TRANSPARENT);
             }
-            dc.drawLine(tickX, tickY, tickX - tickLength * Math.cos(tickAngle), tickY - tickLength * Math.sin(tickAngle));
+            dc.drawLine(tickX, tickY, tickXend, tickYend);
         }
 
         // Draw the outer arc of the progress bar
         dc.setColor(palette1, Graphics.COLOR_TRANSPARENT);
-        dc.setPenWidth(4);
+        dc.setPenWidth(8);
         if (altColorStart != 0 || altColorEnd != 0) {
             var altArcStart = startAngle - 80*altColorStart/100.0;
             var altArcEnd = startAngle - (80 * ((altColorEnd-1))/100);
@@ -273,8 +271,9 @@ class PripiatView extends WatchUi.WatchFace {
             dc.drawArc(centerX, centerY, innerRadius, Graphics.ARC_CLOCKWISE, startAngle, endAngle);
         }
 
-        // Draw ticks and numbers
+        // Draw inner ticks and numbers
         dc.setPenWidth(3);
+        tickLength = 15;
         for (var i = 0; i <= 100; i += 10) {
             // Calculate tick angle
             tickAngle = radianStart + (radianEnd - radianStart) * (i / 100.0);
@@ -285,13 +284,15 @@ class PripiatView extends WatchUi.WatchFace {
             // Calculate tick coordinates
             tickX = centerX + (innerRadius * Math.cos(tickAngle));
             tickY = centerY + (innerRadius * Math.sin(tickAngle));
+            tickXend = centerX + ((innerRadius - tickLength) * Math.cos(tickAngle));
+            tickYend = centerY + ((innerRadius - tickLength) * Math.sin(tickAngle));
 
             // Draw the tick
             dc.setColor(palette1, Graphics.COLOR_TRANSPARENT);
             if (i >= altColorStart && i < altColorEnd) {
                 dc.setColor(palette2dark, Graphics.COLOR_TRANSPARENT);
             }
-            dc.drawLine(tickX, tickY, tickX - tickLength * Math.cos(tickAngle), tickY - tickLength * Math.sin(tickAngle));
+            dc.drawLine(tickX, tickY, tickXend, tickYend);
 
             // Draw numbers for every 20%
             if (i % 20 == 0) {
@@ -302,7 +303,7 @@ class PripiatView extends WatchUi.WatchFace {
                 if (i >= altColorStart && i < altColorEnd) {
                     dc.setColor(palette2, Graphics.COLOR_TRANSPARENT);
                 }
-                dc.drawRadialText(centerX, centerY, font17, text, Graphics.TEXT_JUSTIFY_CENTER, textAngle, innerRadius - font17Height - 10, 0);
+                dc.drawRadialText(centerX, centerY, font20, text, Graphics.TEXT_JUSTIFY_CENTER, textAngle, innerRadius - font20Height - tickLength, 0);
             }
         }
     }
@@ -321,8 +322,8 @@ class PripiatView extends WatchUi.WatchFace {
 
     function drawMetrics(dc) as Void {
         var angles = [180, 0]; // Angles in the same height.
-        var xOffset = 50;
-        var yOffset = 13;
+        var xOffset = 53;
+        var yOffset = 5;
         var hrYOffset = 65;
         var textYOffset = 13;
 
