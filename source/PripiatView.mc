@@ -15,6 +15,8 @@ class PripiatView extends WatchUi.WatchFace {
     var font20Height = 0;
     var font17 = null;
     var font17Height = 0;
+    var ledFont = null;
+    var ledFontSmol = null;
     var palette1 = null;
     var palette1dark = null;
     var palette1light = null;
@@ -37,6 +39,8 @@ class PripiatView extends WatchUi.WatchFace {
             radius = centerX;
         }
         // radius = radius * 0.97; // x% decrease.
+        ledFont = Application.loadResource( Rez.Fonts.id_led );
+        ledFontSmol = Application.loadResource( Rez.Fonts.id_smol );
         font20 = Graphics.getVectorFont({:face=>["RobotoRegular"], :size=>20});
         font20Height = dc.getFontHeight(font20);
         font17 = Graphics.getVectorFont({:face=>["RobotoRegular"], :size=>17});
@@ -59,18 +63,13 @@ class PripiatView extends WatchUi.WatchFace {
     function onUpdate(dc as Dc) as Void {
         dc.setColor(Graphics.COLOR_BLACK, Graphics.COLOR_BLACK);
         dc.clear();
-        
-        // Enable antialiasing
         dc.setAntiAlias(true);
 
-        // Draw the clock face
         drawClockFace(dc);
-
-        // Draw the hands
         drawHands(dc);
-
-        // Draw progress bars
         drawProgressBars(dc);
+        drawDate(dc);
+        drawMetrics(dc);
     }
 
     // Called when this View is removed from the screen. Save the
@@ -152,12 +151,12 @@ class PripiatView extends WatchUi.WatchFace {
         var time = System.getClockTime();
         var hours = time.hour % 12;
         var minutes = time.min;
-        // var seconds = time.sec;
+        var seconds = time.sec;
 
         // Calculate hand angles
         var hourAngle = (hours + minutes / 60.0) * Math.PI / 6.0;
         var minuteAngle = minutes * Math.PI / 30.0;
-        // var secondAngle = seconds * Math.PI / 30.0;
+        var secondAngle = seconds * Math.PI / 30.0;
 
         // Draw hour hand
         var hourLength = radius * 0.35;
@@ -176,12 +175,12 @@ class PripiatView extends WatchUi.WatchFace {
         dc.drawLine(centerX, centerY, minuteEndX, minuteEndY);
 
         // Draw second hand
-        // var secondLength = radius * 0.56;
-        // var secondEndX = centerX + (secondLength * Math.cos(secondAngle - rotationOffset));
-        // var secondEndY = centerY + (secondLength * Math.sin(secondAngle - rotationOffset));
-        // dc.setPenWidth(2);
-        // dc.setColor(palette2, Graphics.COLOR_TRANSPARENT);
-        // dc.drawLine(centerX, centerY, secondEndX, secondEndY);
+        var secondLength = radius * 0.56;
+        var secondEndX = centerX + (secondLength * Math.cos(secondAngle - rotationOffset));
+        var secondEndY = centerY + (secondLength * Math.sin(secondAngle - rotationOffset));
+        dc.setPenWidth(2);
+        dc.setColor(palette2, Graphics.COLOR_TRANSPARENT);
+        dc.drawLine(centerX, centerY, secondEndX, secondEndY);
 
         // Draw center dot
         dc.setColor(palette1, Graphics.COLOR_TRANSPARENT);
@@ -212,7 +211,7 @@ class PripiatView extends WatchUi.WatchFace {
         var radianEnd = degreesToRadians(endAngle);
         var tickAngle, tickX, tickY, textAngle, text;
         
-        // Draw progress.
+        // Draw progress ticks.
         dc.setPenWidth(1);
         for (var i = 0; i <= 100; i += 2.5) {
             tickAngle = radianStart + (radianEnd - radianStart) * (i / 100.0);
@@ -286,6 +285,49 @@ class PripiatView extends WatchUi.WatchFace {
         }
     }
 
+    function drawDate(dc) as Void {
+        var auxRadius = radius * 0.72;  // Radius of the progress bars
+        var angles = [220, 320]; // Angles in the same height.
+        var yOffset = 20;
+
+        var points = lineFromAngles(auxRadius, angles[0], angles[1]);
+        var x = (points[0][0]+ points[1][0])/2;
+        var y = points[0][1] + yOffset;
+
+        dc.setColor(palette1light, Graphics.COLOR_TRANSPARENT);
+        dc.drawText(x, y, font20, "32C TUE, 4 MAR 2025", Graphics.TEXT_JUSTIFY_CENTER);
+    }
+
+    function drawMetrics(dc) as Void {
+        var auxRadius = radius * 0.72;  // Radius of the progress bars
+        var angles = [204, 336]; // Angles in the same height.
+        var xOffset = 60;
+        var yOffset = 38;
+        var textYOffset = 10;
+
+        var points = lineFromAngles(auxRadius, angles[0], angles[1]);
+        var y = points[0][1] - yOffset;
+
+        // Backgrounds.
+        dc.setColor(palette1dark, Graphics.COLOR_TRANSPARENT);
+        dc.drawText(points[0][0]+xOffset, y, ledFont, "####", Graphics.TEXT_JUSTIFY_LEFT);
+        dc.drawText(points[1][0]-xOffset, y, ledFont, "####", Graphics.TEXT_JUSTIFY_RIGHT);
+        // dc.drawText(points[0][0]+xOffset+55, y+yOffset, ledFont, "####", Graphics.TEXT_JUSTIFY_LEFT);
+        dc.drawText((points[0][0]+xOffset + points[1][0]-xOffset)/2, y+yOffset, ledFont, "####", Graphics.TEXT_JUSTIFY_CENTER);
+
+        // Values.
+        dc.setColor(palette1light, Graphics.COLOR_TRANSPARENT);
+        dc.drawText(points[0][0]+xOffset, y, ledFont, "1293", Graphics.TEXT_JUSTIFY_LEFT);
+        dc.drawText(points[1][0]-xOffset, y, ledFont, "4.32", Graphics.TEXT_JUSTIFY_RIGHT);
+        dc.drawText((points[0][0]+xOffset + points[1][0]-xOffset)/2, y+yOffset, ledFont, "0243", Graphics.TEXT_JUSTIFY_CENTER);
+
+        // Text.
+        dc.setColor(palette1light, Graphics.COLOR_TRANSPARENT);
+        dc.drawText(points[0][0]+xOffset+2, y-textYOffset, ledFontSmol, "DLY CALORIES:", Graphics.TEXT_JUSTIFY_LEFT);
+        dc.drawText(points[1][0]-xOffset, y-textYOffset, ledFontSmol, "KM TODAY:", Graphics.TEXT_JUSTIFY_RIGHT);
+        dc.drawText((points[0][0]+xOffset + points[1][0]-xOffset)/2, y+yOffset-textYOffset, ledFontSmol, "LIVE HR:", Graphics.TEXT_JUSTIFY_CENTER);
+    }
+
     /* -------- STATIC FUNCTIONS -------- */
     function radiansToDegrees(angle) { // take a radian and return a degree.
         return angle * 180.0 / Math.PI * -1; // * -1 because garmin is inverted for some reason.
@@ -293,5 +335,21 @@ class PripiatView extends WatchUi.WatchFace {
 
     function degreesToRadians(angle) { // take a degree and return a radian.
         return angle * Math.PI / 180.0 * -1;
+    }
+
+    function lineFromAngles(radius, startAngle, endAngle) as Lang.Array<Lang.Array<Lang.Number>> {
+        // Convert angles to radians
+        var startRadian = degreesToRadians(startAngle);
+        var endRadian = degreesToRadians(endAngle);
+    
+        // Calculate start point coordinates
+        var startX = centerX + radius * Math.cos(startRadian);
+        var startY = centerY + radius * Math.sin(startRadian);
+
+        // Calculate end point coordinates
+        var endX = centerX + radius * Math.cos(endRadian);
+        var endY = centerY + radius * Math.sin(endRadian);
+
+        return [[startX, startY], [endX, endY]];
     }
 }
