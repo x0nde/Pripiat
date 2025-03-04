@@ -312,20 +312,19 @@ class PripiatView extends WatchUi.WatchFace {
         dc.setColor(palette1dark, Graphics.COLOR_TRANSPARENT);
         dc.drawText(points[0][0]+xOffset, y, ledFont, "####", Graphics.TEXT_JUSTIFY_LEFT);
         dc.drawText(points[1][0]-xOffset, y, ledFont, "####", Graphics.TEXT_JUSTIFY_RIGHT);
-        // dc.drawText(points[0][0]+xOffset+55, y+yOffset, ledFont, "####", Graphics.TEXT_JUSTIFY_LEFT);
-        dc.drawText((points[0][0]+xOffset + points[1][0]-xOffset)/2, y+yOffset, ledFont, "####", Graphics.TEXT_JUSTIFY_CENTER);
+        dc.drawText(centerX, y+yOffset, ledFont, "####", Graphics.TEXT_JUSTIFY_CENTER);
 
         // Values.
         dc.setColor(palette1light, Graphics.COLOR_TRANSPARENT);
         dc.drawText(points[0][0]+xOffset, y, ledFont, "1293", Graphics.TEXT_JUSTIFY_LEFT);
         dc.drawText(points[1][0]-xOffset, y, ledFont, "4.32", Graphics.TEXT_JUSTIFY_RIGHT);
-        dc.drawText((points[0][0]+xOffset + points[1][0]-xOffset)/2, y+yOffset, ledFont, "0243", Graphics.TEXT_JUSTIFY_CENTER);
+        dc.drawText(centerX, y+yOffset, ledFont, "0243", Graphics.TEXT_JUSTIFY_CENTER);
 
         // Text.
         dc.setColor(palette1light, Graphics.COLOR_TRANSPARENT);
         dc.drawText(points[0][0]+xOffset+2, y-textYOffset, ledFontSmol, "DLY CALORIES:", Graphics.TEXT_JUSTIFY_LEFT);
         dc.drawText(points[1][0]-xOffset, y-textYOffset, ledFontSmol, "KM TODAY:", Graphics.TEXT_JUSTIFY_RIGHT);
-        dc.drawText((points[0][0]+xOffset + points[1][0]-xOffset)/2, y+yOffset-textYOffset, ledFontSmol, "LIVE HR:", Graphics.TEXT_JUSTIFY_CENTER);
+        dc.drawText(centerX, y+yOffset-textYOffset, ledFontSmol, "LIVE HR:", Graphics.TEXT_JUSTIFY_CENTER);
     }
 
     /* -------- STATIC FUNCTIONS -------- */
