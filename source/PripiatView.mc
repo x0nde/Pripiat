@@ -188,9 +188,6 @@ class PripiatView extends WatchUi.WatchFace {
     }
 
     function drawProgressBars(dc) as Void {
-        var offset = -45;
-        var useOffset = false;
-
         // Define start and end angles for each bar (80o degrees).
         var angles = [
             [220, 140],
@@ -199,9 +196,9 @@ class PripiatView extends WatchUi.WatchFace {
         ];
 
         // Draw the progress bars
-        drawProgressBar(dc, useOffset ? angles[0][0] - offset : angles[0][0], useOffset ? angles[0][1] - offset : angles[0][1], 0, 21, 33);
-        drawProgressBar(dc, useOffset ? angles[1][0] - offset : angles[1][0], useOffset ? angles[1][1] - offset : angles[1][1], 80, 101, 50);
-        drawProgressBar(dc, useOffset ? angles[2][0] - offset : angles[2][0], useOffset ? angles[2][1] - offset : angles[2][1], 0, 0, 78);
+        drawProgressBar(dc, angles[0][0], angles[0][1], 0, 21, 33);
+        drawProgressBar(dc, angles[1][0], angles[1][1], 80, 101, 50);
+        drawProgressBar(dc, angles[2][0], angles[2][1], 0, 0, 78);
     }
 
     function drawProgressBar(dc, startAngle, endAngle, altColorStart, altColorEnd, fill) as Void { // start always have to be greater to simplify math.
@@ -300,9 +297,10 @@ class PripiatView extends WatchUi.WatchFace {
 
     function drawMetrics(dc) as Void {
         var auxRadius = radius * 0.72;  // Radius of the progress bars
-        var angles = [204, 336]; // Angles in the same height.
+        var angles = [180, 0]; // Angles in the same height.
         var xOffset = 60;
-        var yOffset = 38;
+        var yOffset = -10;
+        var hrYOffset = 65;
         var textYOffset = 10;
 
         var points = lineFromAngles(auxRadius, angles[0], angles[1]);
@@ -312,19 +310,19 @@ class PripiatView extends WatchUi.WatchFace {
         dc.setColor(palette1dark, Graphics.COLOR_TRANSPARENT);
         dc.drawText(points[0][0]+xOffset, y, ledFont, "####", Graphics.TEXT_JUSTIFY_LEFT);
         dc.drawText(points[1][0]-xOffset, y, ledFont, "####", Graphics.TEXT_JUSTIFY_RIGHT);
-        dc.drawText(centerX, y+yOffset, ledFont, "####", Graphics.TEXT_JUSTIFY_CENTER);
+        dc.drawText(centerX, centerY + hrYOffset, ledFont, "####", Graphics.TEXT_JUSTIFY_CENTER);
 
         // Values.
         dc.setColor(palette1light, Graphics.COLOR_TRANSPARENT);
         dc.drawText(points[0][0]+xOffset, y, ledFont, "1293", Graphics.TEXT_JUSTIFY_LEFT);
         dc.drawText(points[1][0]-xOffset, y, ledFont, "4.32", Graphics.TEXT_JUSTIFY_RIGHT);
-        dc.drawText(centerX, y+yOffset, ledFont, "0243", Graphics.TEXT_JUSTIFY_CENTER);
+        dc.drawText(centerX, centerY + hrYOffset, ledFont, "0243", Graphics.TEXT_JUSTIFY_CENTER);
 
         // Text.
         dc.setColor(palette1light, Graphics.COLOR_TRANSPARENT);
-        dc.drawText(points[0][0]+xOffset+2, y-textYOffset, ledFontSmol, "DLY CALORIES:", Graphics.TEXT_JUSTIFY_LEFT);
-        dc.drawText(points[1][0]-xOffset, y-textYOffset, ledFontSmol, "KM TODAY:", Graphics.TEXT_JUSTIFY_RIGHT);
-        dc.drawText(centerX, y+yOffset-textYOffset, ledFontSmol, "LIVE HR:", Graphics.TEXT_JUSTIFY_CENTER);
+        dc.drawText(points[0][0]+xOffset+2, y - textYOffset, ledFontSmol, "DLY CALORIES:", Graphics.TEXT_JUSTIFY_LEFT);
+        dc.drawText(points[1][0]-xOffset, y - textYOffset, ledFontSmol, "KM TODAY:", Graphics.TEXT_JUSTIFY_RIGHT);
+        dc.drawText(centerX, centerY + hrYOffset - textYOffset, ledFontSmol, "LIVE HR:", Graphics.TEXT_JUSTIFY_CENTER);
     }
 
     /* -------- STATIC FUNCTIONS -------- */
