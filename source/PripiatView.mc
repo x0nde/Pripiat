@@ -4,7 +4,9 @@ import Toybox.Graphics;
 import Toybox.Lang;
 import Toybox.SensorHistory;
 import Toybox.System;
+import Toybox.Time;
 import Toybox.WatchUi;
+import Toybox.Weather;
 
 class PripiatView extends WatchUi.WatchFace {
     var width = 0;
@@ -39,6 +41,7 @@ class PripiatView extends WatchUi.WatchFace {
     var calories = "";
     var distance = "";
     var heartRate = "";
+    var date = "";
 
     /* -------- CORE FUNCTIONS -------- */
     function initialize() {
@@ -79,6 +82,7 @@ class PripiatView extends WatchUi.WatchFace {
     // the state of this View and prepare it to be shown. This includes
     // loading resources into memory.
     function onShow() as Void {
+        updateDate();
     }
 
     // Update the view
@@ -313,8 +317,8 @@ class PripiatView extends WatchUi.WatchFace {
         var x = (points[0][0]+ points[1][0])/2;
         var y = points[0][1] + yOffset;
 
-        dc.setColor(palette1light, Graphics.COLOR_TRANSPARENT);
-        dc.drawText(x, y, font20, "32C TUE, 4 MAR 2025", Graphics.TEXT_JUSTIFY_CENTER);
+        dc.setColor(palette1, Graphics.COLOR_TRANSPARENT);
+        dc.drawText(x, y, ledFontSmall, date, Graphics.TEXT_JUSTIFY_CENTER);
     }
 
     function drawMetrics(dc) as Void {
@@ -384,6 +388,44 @@ class PripiatView extends WatchUi.WatchFace {
         } 
     }
 
+    function updateDate() as Void {
+        var weather = null;
+        var chance = "";
+        var temp = "";
+        if (Weather.getCurrentConditions != null) {
+            weather = Weather.getCurrentConditions();
+        }
+
+        // Safely check precipitation chance
+        if(weather != null) {
+            if (weather has :precipitationChance &&
+                weather.precipitationChance != null &&
+                weather.precipitationChance instanceof Number) {
+                if(weather.precipitationChance > 0) {
+                    chance = Lang.format(" ($1$%)", [weather.precipitationChance.format("%02d")]);
+                }
+            }
+            if (weather has :temperature && weather.temperature != null) {
+                temp = weather.temperature.format("%01d");
+            }
+        }
+        
+        var today = Time.Gregorian.info(Time.now(), Time.FORMAT_SHORT);
+        date = Lang.format("$1$, $2$ $3$ $4$", [
+                    day_name(today.day_of_week),
+                    today.day,
+                    month_name(today.month),
+                    today.year
+                ]);
+
+        if (temp != "") {
+            date = Lang.format("$1$C $2$", [temp, date]);
+        }
+        if (chance != "") {
+            date = Lang.format("$1$ $2$", [chance, date]);
+        }
+    }
+
     /* -------- STATIC FUNCTIONS -------- */
     function radiansToDegrees(angle) { // take a radian and return a degree.
         return angle * 180.0 / Math.PI * -1; // * -1 because garmin is inverted for some reason.
@@ -407,5 +449,36 @@ class PripiatView extends WatchUi.WatchFace {
         var endY = centerY + radius * Math.sin(endRadian);
 
         return [[startX, startY], [endX, endY]];
+    }
+
+    function day_name(day_of_week) {
+        var names = [
+            "SUN",
+            "MON",
+            "TUE",
+            "WED",
+            "THU",
+            "FRI",
+            "SAT",
+        ];
+        return names[day_of_week - 1];
+    }
+
+    function month_name(month) {
+        var names = [
+            "JAN",
+            "FEB",
+            "MAR",
+            "APR",
+            "MAY",
+            "JUN",
+            "JUL",
+            "AUG",
+            "SEP",
+            "OCT",
+            "NOV",
+            "DEC"
+        ];
+        return names[month - 1];
     }
 }
