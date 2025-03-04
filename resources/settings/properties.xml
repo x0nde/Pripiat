@@ -1,0 +1,8 @@
+<properties>
+    <property id="colorTheme" type="number">7</property>
+    <property id="useRedAccent" type="boolean">true</property>
+    <property id="showInnerCircle" type="boolean">false</property>
+    <property id="showOuterCircle" type="boolean">false</property>
+    <property id="showSecondHand" type="boolean">true</property>
+    <property id="smallSecondHand" type="boolean">false</property>
+</properties>

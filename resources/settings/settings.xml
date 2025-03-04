@@ -1,0 +1,36 @@
+<settings>
+
+    <setting propertyKey="@Properties.colorTheme" title="Color Theme">
+        <settingConfig type="list">
+            <listEntry value="0">Blue</listEntry>
+            <listEntry value="1">Green</listEntry>
+            <listEntry value="2">Amber</listEntry>
+            <listEntry value="3">White</listEntry>
+            <listEntry value="4">Red</listEntry>
+            <listEntry value="5">Purple 1</listEntry>
+            <listEntry value="6">Purple 2</listEntry>
+            <listEntry value="7">Purple 3</listEntry>
+        </settingConfig>
+    </setting>
+
+    <setting propertyKey="@Properties.useRedAccent" title="Use red accent color">
+        <settingConfig type="boolean" />
+    </setting>
+
+    <setting propertyKey="@Properties.showInnerCircle" title="Show inner circle arround seconds in watch face">
+        <settingConfig type="boolean" />
+    </setting>
+
+    <setting propertyKey="@Properties.showOuterCircle" title="Show outer circle arround seconds in watch face">
+        <settingConfig type="boolean" />
+    </setting>
+
+    <setting propertyKey="@Properties.showSecondHand" title="Show seconds hand">
+        <settingConfig type="boolean" />
+    </setting>
+
+    <setting propertyKey="@Properties.smallSecondHand" title="Use smaller seconds hand">
+        <settingConfig type="boolean" />
+    </setting>
+
+</settings>

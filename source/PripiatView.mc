@@ -19,8 +19,6 @@ class PripiatView extends WatchUi.WatchFace {
     
     var font20 = null;
     var font20Height = 0;
-    var font17 = null;
-    var font17Height = 0;
     var ledFont = null;
     var ledFontSmall = null;
     var ledFontBig = null;
@@ -44,6 +42,13 @@ class PripiatView extends WatchUi.WatchFace {
     var date = "";
 
     var lastUpdate = 0;
+
+    var colorTheme;
+    var useRedAccent;
+    var showInnerCircle;
+    var showOuterCircle;
+    var showSecondHand;
+    var smallSecondHand;
 
     /* -------- CORE FUNCTIONS -------- */
     function initialize() {
@@ -69,14 +74,8 @@ class PripiatView extends WatchUi.WatchFace {
         ledFontStorre = Application.loadResource( Rez.Fonts.id_storre );
         font20 = Graphics.getVectorFont({:face=>["RobotoRegular"], :size=>20});
         font20Height = dc.getFontHeight(font20);
-        font17 = Graphics.getVectorFont({:face=>["RobotoRegular"], :size=>17});
-        font17Height = dc.getFontHeight(font17);
-        palette1 = Graphics.COLOR_BLUE;
-        palette1dark = Graphics.createColor(255, 41, 91, 255);
-        palette1darker = Graphics.createColor(255, 0, 0, 120);
-        palette1light = Graphics.createColor(255, 135, 173, 247);
-        palette2 = Graphics.COLOR_RED;
-        palette2dark = Graphics.COLOR_DK_RED;
+        getSettings();
+        setColorTheme();
         dc.setAntiAlias(true);
     }
 
@@ -123,6 +122,7 @@ class PripiatView extends WatchUi.WatchFace {
     /* -------- AUX FUNCTIONS -------- */
     function drawClockFace(dc) as Void {
         // Draw 60 ticks
+        var tickLength = radius * 0.07;
         for (var i = 0; i < 60; i++) {
             var angle = i * Math.PI / 30.0 - rotationOffset; // Convert tick number to radians with 90 dregrees rotation
             
@@ -134,7 +134,6 @@ class PripiatView extends WatchUi.WatchFace {
                 dc.setColor(palette1, Graphics.COLOR_TRANSPARENT);
                 dc.drawRadialText(centerX, centerY, font20, text, Graphics.TEXT_JUSTIFY_CENTER, radiansToDegrees(angle + 2*Math.PI), radius - font20Height + 4, 0);
             } else {
-                var tickLength = radius * 0.07; // Default tick length
                 var tickWidth = 1; // Default tick width
 
                 var startX = centerX + (radius * Math.cos(angle));
@@ -150,13 +149,17 @@ class PripiatView extends WatchUi.WatchFace {
         
         // Text at the bottom.
         dc.setColor(palette1, Graphics.COLOR_TRANSPARENT);
-        dc.drawArc(centerX, centerY, radius*0.92, Graphics.ARC_CLOCKWISE, 0, 360);
+        if (showOuterCircle) {
+            dc.drawArc(centerX, centerY, radius, Graphics.ARC_CLOCKWISE, 0, 360);
+        }
+        if (showInnerCircle) {
+            dc.drawArc(centerX, centerY, radius-tickLength-1, Graphics.ARC_CLOCKWISE, 0, 360);
+        }
         dc.drawText(centerX, height - font20Height - 1, font20, "RobCo", Graphics.TEXT_JUSTIFY_CENTER);
         // Two red lines in the 10" mark.
         var angle = 10 * Math.PI / 30.0 - rotationOffset;
-        var tickLength = radius * 0.07;
         dc.setPenWidth(3);
-        dc.setColor(palette2, Graphics.COLOR_TRANSPARENT);
+        dc.setColor(useRedAccent ? palette2 : palette1, Graphics.COLOR_TRANSPARENT);
         var startX = centerX + (radius * Math.cos(angle-0.02));
         var startY = centerY + (radius * Math.sin(angle-0.02));
         var endX = centerX + ((radius - tickLength) * Math.cos(angle-0.02));
@@ -197,12 +200,14 @@ class PripiatView extends WatchUi.WatchFace {
         dc.drawLine(centerX, centerY, minuteEndX, minuteEndY);
 
         // Draw second hand
-        var secondLength = radius * 0.8;
-        var secondEndX = centerX + (secondLength * Math.cos(secondAngle - rotationOffset));
-        var secondEndY = centerY + (secondLength * Math.sin(secondAngle - rotationOffset));
-        dc.setPenWidth(2);
-        dc.setColor(palette2, Graphics.COLOR_TRANSPARENT);
-        dc.drawLine(centerX, centerY, secondEndX, secondEndY);
+        if (showSecondHand) {
+            var secondLength = smallSecondHand ? radius * 0.55 : radius * 0.85;
+            var secondEndX = centerX + (secondLength * Math.cos(secondAngle - rotationOffset));
+            var secondEndY = centerY + (secondLength * Math.sin(secondAngle - rotationOffset));
+            dc.setPenWidth(2);
+            dc.setColor(useRedAccent ? palette2 : palette1, Graphics.COLOR_TRANSPARENT);
+            dc.drawLine(centerX, centerY, secondEndX, secondEndY);
+        }
 
         // Draw center dot
         dc.setColor(palette1, Graphics.COLOR_TRANSPARENT);
@@ -260,7 +265,7 @@ class PripiatView extends WatchUi.WatchFace {
             if (altArcStart < startAngle) {
                 dc.drawArc(centerX, centerY, innerRadius, Graphics.ARC_CLOCKWISE, startAngle, altArcStart);
             }
-            dc.setColor(palette2dark, Graphics.COLOR_TRANSPARENT);
+            dc.setColor(useRedAccent ? palette2dark : palette1, Graphics.COLOR_TRANSPARENT);
             dc.drawArc(centerX, centerY, innerRadius, Graphics.ARC_CLOCKWISE, altArcStart, altArcEnd);
             if (altArcEnd > endAngle) {
                 dc.setColor(palette1, Graphics.COLOR_TRANSPARENT);
@@ -290,7 +295,7 @@ class PripiatView extends WatchUi.WatchFace {
             // Draw the tick
             dc.setColor(palette1, Graphics.COLOR_TRANSPARENT);
             if (i >= altColorStart && i < altColorEnd) {
-                dc.setColor(palette2dark, Graphics.COLOR_TRANSPARENT);
+                dc.setColor(useRedAccent ? palette2dark : palette1, Graphics.COLOR_TRANSPARENT);
             }
             dc.drawLine(tickX, tickY, tickXend, tickYend);
 
@@ -301,7 +306,7 @@ class PripiatView extends WatchUi.WatchFace {
                 // Draw the number
                 text = i.toString();
                 if (i >= altColorStart && i < altColorEnd) {
-                    dc.setColor(palette2, Graphics.COLOR_TRANSPARENT);
+                    dc.setColor(useRedAccent ? palette2 : palette1, Graphics.COLOR_TRANSPARENT);
                 }
                 dc.drawRadialText(centerX, centerY, font20, text, Graphics.TEXT_JUSTIFY_CENTER, textAngle, innerRadius - font20Height - tickLength, 0);
             }
@@ -422,6 +427,61 @@ class PripiatView extends WatchUi.WatchFace {
         }
         if (chance != "") {
             date = Lang.format("$1$ $2$", [chance, date]);
+        }
+    }
+
+    function getSettings() as Void {
+        colorTheme = Application.Properties.getValue("colorTheme");
+        useRedAccent = Application.Properties.getValue("useRedAccent");
+        showInnerCircle = Application.Properties.getValue("showInnerCircle");
+        showOuterCircle = Application.Properties.getValue("showOuterCircle");
+        showSecondHand = Application.Properties.getValue("showSecondHand");
+        smallSecondHand = Application.Properties.getValue("smallSecondHand");
+    }
+
+    function setColorTheme() as Void {
+        palette2 = Graphics.COLOR_RED;
+        palette2dark = Graphics.COLOR_DK_RED;
+        if (colorTheme == 1) { // Green.
+            palette1 = Graphics.createColor(255, 0, 160, 0);
+            palette1dark = Graphics.createColor(255, 0, 100, 0);
+            palette1darker = Graphics.createColor(255, 0, 50, 0);
+            palette1light = Graphics.createColor(255, 0, 255, 0);
+        } else if (colorTheme == 2) { // Amber.
+            palette1 = Graphics.createColor(255, 250, 108, 0);
+            palette1dark = Graphics.createColor(255, 153, 66, 0);
+            palette1darker = Graphics.createColor(255, 97, 45, 6);
+            palette1light = Graphics.createColor(255, 252, 137, 50);
+        } else if (colorTheme == 3) { // White.
+            palette1 = Graphics.COLOR_WHITE;
+            palette1dark = Graphics.createColor(255, 155, 155, 155);
+            palette1darker = Graphics.createColor(255, 55, 55, 55);
+            palette1light = Graphics.COLOR_WHITE;
+        } else if (colorTheme == 4) { // Red.
+            palette1 = Graphics.createColor(255, 190, 30, 30);
+            palette1dark = Graphics.createColor(255, 120, 0, 0);
+            palette1darker = Graphics.createColor(255, 70, 0, 0);
+            palette1light = Graphics.createColor(255, 255, 0, 0);
+        } else if (colorTheme == 5) { // Purple 1.
+            palette1 = Graphics.createColor(255, 162, 0, 255);
+            palette1dark = Graphics.createColor(255, 108, 0, 171);
+            palette1darker = Graphics.createColor(255, 63, 0, 99);
+            palette1light = Graphics.createColor(255, 187, 69, 255);
+        } else if (colorTheme == 6) { // Purple 2.
+            palette1 = Graphics.createColor(255, 119, 0, 255);
+            palette1dark = Graphics.createColor(255, 80, 0, 171);
+            palette1darker = Graphics.createColor(255, 47, 0, 99);
+            palette1light = Graphics.createColor(255, 157, 71, 255);
+        } else if (colorTheme == 7) { // Purple 3.
+            palette1 = Graphics.createColor(255, 70, 70, 190);
+            palette1dark = Graphics.createColor(255, 30, 30, 120);
+            palette1darker = Graphics.createColor(255, 0, 0, 70);
+            palette1light = Graphics.createColor(255, 90, 90, 255);
+        }else { // Default Theme, Blue colorTheme == 0.
+            palette1 = Graphics.COLOR_BLUE;
+            palette1dark = Graphics.createColor(255, 41, 91, 255);
+            palette1darker = Graphics.createColor(255, 0, 0, 120);
+            palette1light = Graphics.createColor(255, 135, 173, 247);
         }
     }
 
