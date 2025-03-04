@@ -43,6 +43,8 @@ class PripiatView extends WatchUi.WatchFace {
     var heartRate = "";
     var date = "";
 
+    var lastUpdate = 0;
+
     /* -------- CORE FUNCTIONS -------- */
     function initialize() {
         WatchFace.initialize();
@@ -69,13 +71,13 @@ class PripiatView extends WatchUi.WatchFace {
         font20Height = dc.getFontHeight(font20);
         font17 = Graphics.getVectorFont({:face=>["RobotoRegular"], :size=>17});
         font17Height = dc.getFontHeight(font17);
-        palette1 = Graphics.COLOR_BLUE; // Graphics.COLOR_WHITE; or Graphics.COLOR_GREEN;
-        // palette1dark = Graphics.COLOR_DK_BLUE;
+        palette1 = Graphics.COLOR_BLUE;
         palette1dark = Graphics.createColor(255, 41, 91, 255);
         palette1darker = Graphics.createColor(255, 0, 0, 120);
         palette1light = Graphics.createColor(255, 135, 173, 247);
         palette2 = Graphics.COLOR_RED;
         palette2dark = Graphics.COLOR_DK_RED;
+        dc.setAntiAlias(true);
     }
 
     // Called when this View is brought to the foreground. Restore
@@ -87,11 +89,15 @@ class PripiatView extends WatchUi.WatchFace {
 
     // Update the view
     function onUpdate(dc as Dc) as Void {
+        var clockTime = System.getClockTime();
+        var now = Time.now().value();
         dc.setColor(Graphics.COLOR_BLACK, Graphics.COLOR_BLACK);
         dc.clear();
-        dc.setAntiAlias(true);
-
-        updateMetrics();
+        
+        if(lastUpdate == null or now - lastUpdate > 30 or clockTime.sec % 60 == 0) {
+            lastUpdate = now;
+            updateMetrics();
+        }
 
         drawClockFace(dc);
         drawProgressBars(dc);
@@ -116,8 +122,6 @@ class PripiatView extends WatchUi.WatchFace {
 
     /* -------- AUX FUNCTIONS -------- */
     function drawClockFace(dc) as Void {
-        var time = System.getClockTime();
-        var seconds = time.sec;
         // Draw 60 ticks
         for (var i = 0; i < 60; i++) {
             var angle = i * Math.PI / 30.0 - rotationOffset; // Convert tick number to radians with 90 dregrees rotation
@@ -127,9 +131,6 @@ class PripiatView extends WatchUi.WatchFace {
                 var number = i;
                 var text = number.format("%02d");
                 dc.setColor(palette1, Graphics.COLOR_TRANSPARENT);
-                if (i == seconds) {
-                    dc.setColor(palette2, Graphics.COLOR_TRANSPARENT);
-                }
                 dc.drawRadialText(centerX, centerY, font20, text, Graphics.TEXT_JUSTIFY_CENTER,radiansToDegrees(angle), radius - font20Height + 2, 0);
             } else if (i == 10 || i == 29 || i == 30 || i ==  31) { // Skip these for making room.
                 continue;
@@ -148,9 +149,6 @@ class PripiatView extends WatchUi.WatchFace {
 
                 dc.setPenWidth(tickWidth);
                 dc.setColor(palette1, Graphics.COLOR_TRANSPARENT);
-                if (i == seconds) {
-                    dc.setColor(palette2, Graphics.COLOR_TRANSPARENT);
-                }
                 dc.drawLine(startX, startY, endX, endY);
             }
         }
@@ -203,7 +201,7 @@ class PripiatView extends WatchUi.WatchFace {
         dc.drawLine(centerX, centerY, minuteEndX, minuteEndY);
 
         // Draw second hand
-        var secondLength = radius * 0.54;
+        var secondLength = radius * 0.8;
         var secondEndX = centerX + (secondLength * Math.cos(secondAngle - rotationOffset));
         var secondEndY = centerY + (secondLength * Math.sin(secondAngle - rotationOffset));
         dc.setPenWidth(2);
@@ -311,7 +309,7 @@ class PripiatView extends WatchUi.WatchFace {
 
     function drawDate(dc) as Void {
         var angles = [220, 320]; // Angles in the same height.
-        var yOffset = 17;
+        var yOffset = 20;
 
         var points = lineFromAngles(innerRadius, angles[0], angles[1]);
         var x = (points[0][0]+ points[1][0])/2;
