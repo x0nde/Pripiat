@@ -1,11 +1,11 @@
 <properties>
-    <property id="colorTheme" type="number">1</property>
-    <property id="useRedAccent" type="boolean">true</property>
+    <property id="colorTheme" type="number">6</property>
+    <property id="useRedAccent" type="boolean">false</property>
     <property id="showSecondHand" type="boolean">true</property>
     <property id="smallClockHands" type="boolean">false</property>
-    <property id="circleAroundTheSeconds" type="number">1</property>
-    <property id="flipRightBar" type="boolean">true</property>
-    <property id="rightBarMetric" type="number">4</property>
+    <property id="circleAroundTheSeconds" type="number">0</property>
     <property id="leftBarMetric" type="number">2</property>
-    <property id="topBarMetric" type="number">1</property>
+    <property id="topBarMetric" type="number">0</property>
+    <property id="rightBarMetric" type="number">1</property>
+    <property id="flipRightBar" type="boolean">true</property>
 </properties>

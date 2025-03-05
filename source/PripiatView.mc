@@ -107,7 +107,7 @@ class PripiatView extends WatchUi.WatchFace {
         dc.setColor(Graphics.COLOR_BLACK, Graphics.COLOR_BLACK);
         dc.clear();
         
-        if(lastUpdate == null or now - lastUpdate > 30 or clockTime.sec % 60 == 0) {
+        if(lastUpdate == null or now - lastUpdate > 60) {
             lastUpdate = now;
             updateMetrics();
         }
@@ -428,8 +428,11 @@ class PripiatView extends WatchUi.WatchFace {
         var now = Time.now();
         var halfHour = new Time.Duration(1800);
 
-        if (lastDateUpdate != null  && (now - lastDateUpdate).lessThan(halfHour)) {
-            return; // early return to avoid too much time updates.
+        if (lastDateUpdate != null) {
+            var diff = now.subtract(lastDateUpdate) as Time.Duration;
+             if (diff.lessThan(halfHour)) {
+                return; // early return to avoid too much time updates.
+             }
         }
         lastDateUpdate = now;
 
