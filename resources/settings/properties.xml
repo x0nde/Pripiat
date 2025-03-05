@@ -1,5 +1,6 @@
 <properties>
-    <property id="colorTheme" type="number">6</property>
+    <property id="colorTheme" type="number">0</property>
+    <property id="drawScanlines" type="boolean">true</property>
     <property id="useRedAccent" type="boolean">false</property>
     <property id="showSecondHand" type="boolean">true</property>
     <property id="smallClockHands" type="boolean">false</property>

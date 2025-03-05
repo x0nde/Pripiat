@@ -25,6 +25,7 @@ class PripiatView extends WatchUi.WatchFace {
     var ledFontSmol = null;
     var ledFontStorre = null;
 
+    var scanlines;
     var palette1 = null;
     var palette1dark = null;
     var palette1darker = null;
@@ -50,6 +51,7 @@ class PripiatView extends WatchUi.WatchFace {
     var lastUpdate = 0;
 
     var colorTheme;
+    var drawScanlines;
     var useRedAccent;
     var circleAroundTheSeconds;
     var showSecondHand;
@@ -102,7 +104,6 @@ class PripiatView extends WatchUi.WatchFace {
 
     // Update the view
     function onUpdate(dc as Dc) as Void {
-        var clockTime = System.getClockTime();
         var now = Time.now().value();
         dc.setColor(Graphics.COLOR_BLACK, Graphics.COLOR_BLACK);
         dc.clear();
@@ -111,7 +112,9 @@ class PripiatView extends WatchUi.WatchFace {
             lastUpdate = now;
             updateMetrics();
         }
-
+        if (drawScanlines) {
+            drawCRTEffects(dc);
+        }
         drawClockFace(dc);
         drawProgressBars(dc);
         drawDate(dc);
@@ -136,6 +139,10 @@ class PripiatView extends WatchUi.WatchFace {
     }
 
     /* -------- AUX FUNCTIONS -------- */
+    function drawCRTEffects(dc) as Void {
+        dc.drawBitmap(0, 0, scanlines);
+    }
+
     function drawClockFace(dc) as Void {
         // Draw 60 ticks
         var tickLength = radius * 0.07;
@@ -483,6 +490,7 @@ class PripiatView extends WatchUi.WatchFace {
 
     function getSettings() as Void {
         colorTheme = Application.Properties.getValue("colorTheme");
+        drawScanlines = Application.Properties.getValue("drawScanlines");
         useRedAccent = Application.Properties.getValue("useRedAccent");
         circleAroundTheSeconds = Application.Properties.getValue("circleAroundTheSeconds");
         showSecondHand = Application.Properties.getValue("showSecondHand");
@@ -501,41 +509,49 @@ class PripiatView extends WatchUi.WatchFace {
             palette1dark = Graphics.createColor(255, 0, 100, 0);
             palette1darker = Graphics.createColor(255, 0, 50, 0);
             palette1light = Graphics.createColor(255, 0, 255, 0);
+            scanlines = Application.loadResource(Rez.Drawables.greenScanline);
         } else if (colorTheme == 2) { // Amber.
             palette1 = Graphics.createColor(255, 250, 108, 0);
             palette1dark = Graphics.createColor(255, 153, 66, 0);
             palette1darker = Graphics.createColor(255, 97, 45, 6);
             palette1light = Graphics.createColor(255, 252, 137, 50);
+            scanlines = Application.loadResource(Rez.Drawables.amberScanline);
         } else if (colorTheme == 3) { // White.
             palette1 = Graphics.COLOR_WHITE;
             palette1dark = Graphics.createColor(255, 155, 155, 155);
             palette1darker = Graphics.createColor(255, 55, 55, 55);
             palette1light = Graphics.COLOR_WHITE;
+            scanlines = Application.loadResource(Rez.Drawables.whiteScanline);
         } else if (colorTheme == 4) { // Red.
             palette1 = Graphics.createColor(255, 190, 30, 30);
             palette1dark = Graphics.createColor(255, 120, 0, 0);
             palette1darker = Graphics.createColor(255, 70, 0, 0);
             palette1light = Graphics.createColor(255, 255, 0, 0);
+            scanlines = Application.loadResource(Rez.Drawables.redeScanline);
         } else if (colorTheme == 5) { // Purple 1.
             palette1 = Graphics.createColor(255, 162, 0, 255);
             palette1dark = Graphics.createColor(255, 108, 0, 171);
             palette1darker = Graphics.createColor(255, 63, 0, 99);
             palette1light = Graphics.createColor(255, 187, 69, 255);
+            scanlines = Application.loadResource(Rez.Drawables.purpleSanline);
         } else if (colorTheme == 6) { // Purple 2.
             palette1 = Graphics.createColor(255, 119, 0, 255);
             palette1dark = Graphics.createColor(255, 80, 0, 171);
             palette1darker = Graphics.createColor(255, 47, 0, 99);
             palette1light = Graphics.createColor(255, 157, 71, 255);
+            scanlines = Application.loadResource(Rez.Drawables.purpleSanline);
         } else if (colorTheme == 7) { // Purple 3.
             palette1 = Graphics.createColor(255, 70, 70, 190);
             palette1dark = Graphics.createColor(255, 30, 30, 120);
             palette1darker = Graphics.createColor(255, 0, 0, 70);
             palette1light = Graphics.createColor(255, 90, 90, 255);
+            scanlines = Application.loadResource(Rez.Drawables.blueScanline);
         }else { // Default Theme, Blue colorTheme == 0.
             palette1 = Graphics.COLOR_BLUE;
             palette1dark = Graphics.createColor(255, 41, 91, 255);
             palette1darker = Graphics.createColor(255, 0, 0, 120);
             palette1light = Graphics.createColor(255, 135, 173, 247);
+            scanlines = Application.loadResource(Rez.Drawables.blueScanline);
         }
     }
 

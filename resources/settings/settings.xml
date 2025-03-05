@@ -13,6 +13,10 @@
         </settingConfig>
     </setting>
 
+    <setting propertyKey="@Properties.drawScanlines" title="Apply a scranline effect on the background">
+        <settingConfig type="boolean" />
+    </setting>
+
     <setting propertyKey="@Properties.useRedAccent" title="Use red accent color">
         <settingConfig type="boolean" />
     </setting>

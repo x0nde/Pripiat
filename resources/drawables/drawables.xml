@@ -1,3 +1,9 @@
 <drawables>
     <bitmap id="LauncherIcon" filename="launcher_icon.png" />
+    <bitmap id="greenScanline" filename="greenScanline.png" />
+    <bitmap id="blueScanline" filename="blueScanline.png" />
+    <bitmap id="amberScanline" filename="amberScanline.png" />
+    <bitmap id="whiteScanline" filename="whiteScanline.png" />
+    <bitmap id="redeScanline" filename="redScanline.png" />
+    <bitmap id="purpleSanline" filename="purpleScanline.png" />
 </drawables>
