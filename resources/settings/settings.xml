@@ -29,7 +29,7 @@
         <settingConfig type="boolean" />
     </setting>
 
-    <setting propertyKey="@Properties.smallSecondHand" title="Use smaller seconds hand">
+    <setting propertyKey="@Properties.smallClockHands" title="Use smaller hands for minute and second">
         <settingConfig type="boolean" />
     </setting>
 

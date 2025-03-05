@@ -48,7 +48,7 @@ class PripiatView extends WatchUi.WatchFace {
     var showInnerCircle;
     var showOuterCircle;
     var showSecondHand;
-    var smallSecondHand;
+    var smallClockHands;
 
     /* -------- CORE FUNCTIONS -------- */
     function initialize() {
@@ -191,7 +191,7 @@ class PripiatView extends WatchUi.WatchFace {
         var secondAngle = seconds * Math.PI / 30.0;
 
         // Draw hour hand
-        var hourLength = radius * 0.35;
+        var hourLength = smallClockHands ? radius * 0.4 : radius * 0.55;
         var hourEndX = centerX + (hourLength * Math.cos(hourAngle - rotationOffset));
         var hourEndY = centerY + (hourLength * Math.sin(hourAngle - rotationOffset));
         dc.setPenWidth(6);
@@ -199,7 +199,7 @@ class PripiatView extends WatchUi.WatchFace {
         dc.drawLine(centerX, centerY, hourEndX, hourEndY);
 
         // Draw minute hand
-        var minuteLength = radius * 0.55;
+        var minuteLength = smallClockHands ? radius * 0.50 : radius * 0.83;
         var minuteEndX = centerX + (minuteLength * Math.cos(minuteAngle - rotationOffset));
         var minuteEndY = centerY + (minuteLength * Math.sin(minuteAngle - rotationOffset));
         dc.setPenWidth(4);
@@ -208,7 +208,7 @@ class PripiatView extends WatchUi.WatchFace {
 
         // Draw second hand
         if (showSecondHand) {
-            var secondLength = smallSecondHand ? radius * 0.55 : radius * 0.85;
+            var secondLength = smallClockHands ? radius * 0.55 : radius * 0.9;
             var secondEndX = centerX + (secondLength * Math.cos(secondAngle - rotationOffset));
             var secondEndY = centerY + (secondLength * Math.sin(secondAngle - rotationOffset));
             dc.setPenWidth(2);
@@ -443,7 +443,7 @@ class PripiatView extends WatchUi.WatchFace {
         showInnerCircle = Application.Properties.getValue("showInnerCircle");
         showOuterCircle = Application.Properties.getValue("showOuterCircle");
         showSecondHand = Application.Properties.getValue("showSecondHand");
-        smallSecondHand = Application.Properties.getValue("smallSecondHand");
+        smallClockHands = Application.Properties.getValue("smallClockHands");
     }
 
     function setColorTheme() as Void {
