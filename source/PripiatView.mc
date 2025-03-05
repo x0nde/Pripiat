@@ -32,10 +32,16 @@ class PripiatView extends WatchUi.WatchFace {
     var palette2 = null;
     var palette2dark = null;
 
+    var lastDateUpdate = null;
     var bodyBat = 0;
     var stress = 0;
     var step = 0;
+    var sunset = 0;
+    var sunrise = 0;
+    var sunPosition = 0;
+    var battery = 0;
     var stepGoal = 0;
+    var stepGoalPercentage = 0.0;
     var calories = "";
     var distance = "";
     var heartRate = "";
@@ -45,10 +51,13 @@ class PripiatView extends WatchUi.WatchFace {
 
     var colorTheme;
     var useRedAccent;
-    var showInnerCircle;
-    var showOuterCircle;
+    var circleAroundTheSeconds;
     var showSecondHand;
     var smallClockHands;
+    var flipRightBar;
+    var rightBarMetric;
+    var leftBarMetric;
+    var topBarMetric;
 
     /* -------- CORE FUNCTIONS -------- */
     function initialize() {
@@ -130,6 +139,7 @@ class PripiatView extends WatchUi.WatchFace {
     function drawClockFace(dc) as Void {
         // Draw 60 ticks
         var tickLength = radius * 0.07;
+        var tickWidth = 2; // Default tick width
         for (var i = 0; i < 60; i++) {
             var angle = i * Math.PI / 30.0 - rotationOffset; // Convert tick number to radians with 90 dregrees rotation
             
@@ -141,7 +151,6 @@ class PripiatView extends WatchUi.WatchFace {
                 dc.setColor(palette1, Graphics.COLOR_TRANSPARENT);
                 dc.drawRadialText(centerX, centerY, font20, text, Graphics.TEXT_JUSTIFY_CENTER, radiansToDegrees(angle + 2*Math.PI), radius - font20Height + 4, 0);
             } else {
-                var tickWidth = 1; // Default tick width
 
                 var startX = centerX + (radius * Math.cos(angle));
                 var startY = centerY + (radius * Math.sin(angle));
@@ -156,16 +165,15 @@ class PripiatView extends WatchUi.WatchFace {
         
         // Text at the bottom.
         dc.setColor(palette1, Graphics.COLOR_TRANSPARENT);
-        if (showOuterCircle) {
-            dc.drawArc(centerX, centerY, radius, Graphics.ARC_CLOCKWISE, 0, 360);
-        }
-        if (showInnerCircle) {
+        dc.setPenWidth(3);
+        if (circleAroundTheSeconds == 1) {
+            dc.drawArc(centerX, centerY, radius-0.5, Graphics.ARC_CLOCKWISE, 0, 360);
+        } else if (circleAroundTheSeconds == 2) {
             dc.drawArc(centerX, centerY, radius-tickLength-1, Graphics.ARC_CLOCKWISE, 0, 360);
         }
         dc.drawText(centerX, height - font20Height - 1, font20, "RobCo", Graphics.TEXT_JUSTIFY_CENTER);
         // Two red lines in the 10" mark.
         var angle = 10 * Math.PI / 30.0 - rotationOffset;
-        dc.setPenWidth(3);
         dc.setColor(useRedAccent ? palette2 : palette1, Graphics.COLOR_TRANSPARENT);
         var startX = centerX + (radius * Math.cos(angle-0.02));
         var startY = centerY + (radius * Math.sin(angle-0.02));
@@ -230,12 +238,12 @@ class PripiatView extends WatchUi.WatchFace {
         ];
 
         // Draw the progress bars
-        drawProgressBar(dc, angles[0][0], angles[0][1], 0, 21, bodyBat);
-        drawProgressBar(dc, angles[1][0], angles[1][1], 80, 101, stress);
-        drawProgressBar(dc, angles[2][0], angles[2][1], 0, 0, 100.0 * step / stepGoal);
+        drawProgressBar(dc, angles[0][0], angles[0][1], 0, 21, metricForProgressBar(leftBarMetric), false);
+        drawProgressBar(dc, angles[1][0], angles[1][1], 80, 101, metricForProgressBar(topBarMetric), false);
+        drawProgressBar(dc, angles[2][0], angles[2][1], 0, 0, metricForProgressBar(rightBarMetric), flipRightBar);
     }
 
-    function drawProgressBar(dc, startAngle, endAngle, altColorStart, altColorEnd, fill) as Void { // start always have to be greater to simplify math.
+    function drawProgressBar(dc, startAngle, endAngle, altColorStart, altColorEnd, fill, flip) as Void { // start always have to be greater to simplify math.
         var radianStart = degreesToRadians(startAngle + 360);
         var radianEnd = degreesToRadians(endAngle + 360);
         var tickLength, tickAngle, tickX, tickY, tickXend, tickYend, textAngle, text;
@@ -257,7 +265,7 @@ class PripiatView extends WatchUi.WatchFace {
 
             // Draw the tick
             dc.setColor(palette1dark, Graphics.COLOR_TRANSPARENT);
-            if (i <= fill) {
+            if (flip ? 100 - i <= fill : i <= fill) {
                 dc.setColor(palette1light, Graphics.COLOR_TRANSPARENT);
             }
             dc.drawLine(tickX, tickY, tickXend, tickYend);
@@ -267,8 +275,12 @@ class PripiatView extends WatchUi.WatchFace {
         dc.setColor(palette1, Graphics.COLOR_TRANSPARENT);
         dc.setPenWidth(8);
         if (altColorStart != 0 || altColorEnd != 0) {
-            var altArcStart = startAngle - 80*altColorStart/100.0;
-            var altArcEnd = startAngle - (80 * ((altColorEnd-1))/100);
+            var altArcStart = startAngle - (80*(altColorStart)/100.0);
+            var altArcEnd = startAngle - (80 * ((altColorEnd-1))/100.0);
+            if (flip) {
+                altArcStart = startAngle - (80*(100 - altColorEnd)/100.0);
+                altArcEnd = startAngle - (80 * ((100 - altColorStart))/100.0);
+            }
             if (altArcStart < startAngle) {
                 dc.drawArc(centerX, centerY, innerRadius, Graphics.ARC_CLOCKWISE, startAngle, altArcStart);
             }
@@ -294,14 +306,14 @@ class PripiatView extends WatchUi.WatchFace {
             }
 
             // Calculate tick coordinates
-            tickX = centerX + (innerRadius * Math.cos(tickAngle));
-            tickY = centerY + (innerRadius * Math.sin(tickAngle));
+            tickX = centerX + ((innerRadius+2) * Math.cos(tickAngle));
+            tickY = centerY + ((innerRadius+2) * Math.sin(tickAngle));
             tickXend = centerX + ((innerRadius - tickLength) * Math.cos(tickAngle));
             tickYend = centerY + ((innerRadius - tickLength) * Math.sin(tickAngle));
 
             // Draw the tick
             dc.setColor(palette1, Graphics.COLOR_TRANSPARENT);
-            if (i >= altColorStart && i < altColorEnd) {
+            if ((!flip && i >= altColorStart && i < altColorEnd) || (flip && i > 100 - altColorEnd && i <= 100 - altColorStart)) {
                 dc.setColor(useRedAccent ? palette2dark : palette1, Graphics.COLOR_TRANSPARENT);
             }
             dc.drawLine(tickX, tickY, tickXend, tickYend);
@@ -309,10 +321,18 @@ class PripiatView extends WatchUi.WatchFace {
             // Draw numbers for every 20%
             if (i % 20 == 0) {
                 textAngle = radiansToDegrees(tickAngle);
+                if (!flip && i == 100) {
+                    textAngle += 3.5;
+                } else if (flip && i == 0) {
+                    textAngle -= 3;
+                }
 
                 // Draw the number
                 text = i.toString();
-                if (i >= altColorStart && i < altColorEnd) {
+                if (flip) {
+                    text = (100 - i).toString();
+                }
+                if ((!flip && i >= altColorStart && i < altColorEnd) || (flip && i > 100 - altColorEnd && i <= 100 - altColorStart)) {
                     dc.setColor(useRedAccent ? palette2 : palette1, Graphics.COLOR_TRANSPARENT);
                 }
                 dc.drawRadialText(centerX, centerY, font20, text, Graphics.TEXT_JUSTIFY_CENTER, textAngle, innerRadius - font20Height - tickLength, 0);
@@ -380,6 +400,7 @@ class PripiatView extends WatchUi.WatchFace {
         var activityInfo = Activity.getActivityInfo();
         step = monitorInfo.steps;
         stepGoal = monitorInfo.stepGoal;
+        stepGoalPercentage = 100.0 * step / stepGoal;
         calories = monitorInfo.calories.format("%04d");
         var km = monitorInfo.distance / 100000.0; // km / day.
         if (km >= 10) {
@@ -396,13 +417,22 @@ class PripiatView extends WatchUi.WatchFace {
             if ((hist != null) && (hist.heartRate != ActivityMonitor.INVALID_HR_SAMPLE)) {
                 heartRate = hist.heartRate.format("%04d");
             }
-        } 
+        }
+        battery = System.getSystemStats().battery;
     }
 
     function updateDate() as Void {
         var weather = null;
         var chance = "";
         var temp = "";
+        var now = Time.now();
+        var halfHour = new Time.Duration(1800);
+
+        if (lastDateUpdate != null  && (now - lastDateUpdate).lessThan(halfHour)) {
+            return; // early return to avoid too much time updates.
+        }
+        lastDateUpdate = now;
+
         if (Weather.getCurrentConditions != null) {
             weather = Weather.getCurrentConditions();
         }
@@ -419,9 +449,20 @@ class PripiatView extends WatchUi.WatchFace {
             if (weather has :temperature && weather.temperature != null) {
                 temp = weather.temperature.format("%01d");
             }
+            var loc = weather.observationLocationPosition;
+            if(loc != null) {
+                sunrise = Weather.getSunrise(loc, now).value();
+                sunset = Weather.getSunrise(loc, now).value();
+                sunPosition = 100 * (now.value() - sunrise) / (sunset - sunrise);
+                if (sunPosition > 100) {
+                    sunPosition = 100;
+                } else if (sunPosition < 0) {
+                    sunPosition = 0;
+                }
+            }
         }
         
-        var today = Time.Gregorian.info(Time.now(), Time.FORMAT_SHORT);
+        var today = Time.Gregorian.info(now, Time.FORMAT_SHORT);
         date = Lang.format("$1$, $2$ $3$ $4$", [
                     day_name(today.day_of_week),
                     today.day,
@@ -440,10 +481,13 @@ class PripiatView extends WatchUi.WatchFace {
     function getSettings() as Void {
         colorTheme = Application.Properties.getValue("colorTheme");
         useRedAccent = Application.Properties.getValue("useRedAccent");
-        showInnerCircle = Application.Properties.getValue("showInnerCircle");
-        showOuterCircle = Application.Properties.getValue("showOuterCircle");
+        circleAroundTheSeconds = Application.Properties.getValue("circleAroundTheSeconds");
         showSecondHand = Application.Properties.getValue("showSecondHand");
         smallClockHands = Application.Properties.getValue("smallClockHands");
+        flipRightBar = Application.Properties.getValue("flipRightBar");
+        rightBarMetric = Application.Properties.getValue("rightBarMetric");
+        leftBarMetric = Application.Properties.getValue("leftBarMetric");
+        topBarMetric = Application.Properties.getValue("topBarMetric");
     }
 
     function setColorTheme() as Void {
@@ -546,5 +590,20 @@ class PripiatView extends WatchUi.WatchFace {
             "DEC"
         ];
         return names[month - 1];
+    }
+
+    function metricForProgressBar(n) {
+        if (n == 0) {
+            return stepGoalPercentage;
+        } else if (n == 1) {
+            return battery;
+        } else if (n == 2) {
+            return bodyBat;
+        } else if (n == 3) {
+            return stress;
+        } else if (n == 4) {
+            return sunPosition;
+        }
+        return battery;
     }
 }

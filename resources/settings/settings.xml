@@ -17,20 +17,54 @@
         <settingConfig type="boolean" />
     </setting>
 
-    <setting propertyKey="@Properties.showInnerCircle" title="Show inner circle arround seconds in watch face">
-        <settingConfig type="boolean" />
-    </setting>
-
-    <setting propertyKey="@Properties.showOuterCircle" title="Show outer circle arround seconds in watch face">
-        <settingConfig type="boolean" />
-    </setting>
-
     <setting propertyKey="@Properties.showSecondHand" title="Show seconds hand">
         <settingConfig type="boolean" />
     </setting>
 
     <setting propertyKey="@Properties.smallClockHands" title="Use smaller hands for minute and second">
         <settingConfig type="boolean" />
+    </setting>
+
+    <setting propertyKey="@Properties.circleAroundTheSeconds" title="Draw a circle close to the second numbers">
+        <settingConfig type="list">
+            <listEntry value="0">off</listEntry>
+            <listEntry value="1">External circle</listEntry>
+            <listEntry value="2">Internal</listEntry>
+        </settingConfig>
+    </setting>
+
+    <setting propertyKey="@Properties.flipRightBar" title="Invert the right bar direction (top to bottom -> bottom to top)">
+        <settingConfig type="boolean" />
+    </setting>
+
+    <setting propertyKey="@Properties.rightBarMetric" title="Metric for right bar">
+        <settingConfig type="list">
+            <listEntry value="0">Step goal percentage</listEntry>
+            <listEntry value="1">Battery</listEntry>
+            <listEntry value="2">Body battery</listEntry>
+            <listEntry value="3">Stress</listEntry>
+            <listEntry value="4">Sun position</listEntry>
+        </settingConfig>
+    </setting>
+
+    <setting propertyKey="@Properties.leftBarMetric" title="Metric for left bar">
+        <settingConfig type="list">
+            <listEntry value="0">Step goal percentage</listEntry>
+            <listEntry value="1">Battery</listEntry>
+            <listEntry value="2">Body battery</listEntry>
+            <listEntry value="3">Stress</listEntry>
+            <listEntry value="4">Sun position</listEntry>
+        </settingConfig>
+    </setting>
+
+    <setting propertyKey="@Properties.topBarMetric" title="Metric for top bar">
+        <settingConfig type="list">
+            <listEntry value="0">Step goal percentage</listEntry>
+            <listEntry value="1">Battery</listEntry>
+            <listEntry value="2">Body battery</listEntry>
+            <listEntry value="3">Stress</listEntry>
+            <listEntry value="4">Sun position</listEntry>
+        </settingConfig>
     </setting>
 
 </settings>
