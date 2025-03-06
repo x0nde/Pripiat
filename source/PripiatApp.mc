@@ -4,6 +4,8 @@ import Toybox.WatchUi;
 
 class PripiatApp extends Application.AppBase {
 
+    var mView;
+
     function initialize() {
         AppBase.initialize();
     }
@@ -18,7 +20,14 @@ class PripiatApp extends Application.AppBase {
 
     // Return the initial view of your application here
     function getInitialView() as [Views] or [Views, InputDelegates] {
-        return [ new PripiatView() ];
+        mView = new PripiatView();
+        onSettingsChanged();
+        return [ mView ];
+    }
+
+    function onSettingsChanged() as Void {
+        mView.onSettingsChanged();
+        WatchUi.requestUpdate();
     }
 
 }

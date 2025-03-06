@@ -37,20 +37,6 @@
         </settingConfig>
     </setting>
 
-    <setting propertyKey="@Properties.flipRightBar" title="Invert the right bar direction (top to bottom -> bottom to top)">
-        <settingConfig type="boolean" />
-    </setting>
-
-    <setting propertyKey="@Properties.rightBarMetric" title="Metric for right bar">
-        <settingConfig type="list">
-            <listEntry value="0">Step goal percentage</listEntry>
-            <listEntry value="1">Battery</listEntry>
-            <listEntry value="2">Body battery</listEntry>
-            <listEntry value="3">Stress</listEntry>
-            <listEntry value="4">Sun position</listEntry>
-        </settingConfig>
-    </setting>
-
     <setting propertyKey="@Properties.leftBarMetric" title="Metric for left bar">
         <settingConfig type="list">
             <listEntry value="0">Step goal percentage</listEntry>
@@ -69,6 +55,20 @@
             <listEntry value="3">Stress</listEntry>
             <listEntry value="4">Sun position</listEntry>
         </settingConfig>
+    </setting>
+    
+    <setting propertyKey="@Properties.rightBarMetric" title="Metric for right bar">
+        <settingConfig type="list">
+            <listEntry value="0">Step goal percentage</listEntry>
+            <listEntry value="1">Battery</listEntry>
+            <listEntry value="2">Body battery</listEntry>
+            <listEntry value="3">Stress</listEntry>
+            <listEntry value="4">Sun position</listEntry>
+        </settingConfig>
+    </setting>
+
+    <setting propertyKey="@Properties.flipRightBar" title="Invert the right bar direction (top to bottom -> bottom to top)">
+        <settingConfig type="boolean" />
     </setting>
 
 </settings>

@@ -48,7 +48,7 @@ class PripiatView extends WatchUi.WatchFace {
     var heartRate = "";
     var date = "";
 
-    var lastUpdate = 0;
+    var lastUpdate = null;
 
     var colorTheme;
     var drawScanlines;
@@ -85,14 +85,16 @@ class PripiatView extends WatchUi.WatchFace {
         ledFontStorre = Application.loadResource( Rez.Fonts.id_storre );
         font20 = Graphics.getVectorFont({:face=>["RobotoRegular"], :size=>20});
         font20Height = dc.getFontHeight(font20);
-        getSettings();
+        cacheProps();
         setColorTheme();
         dc.setAntiAlias(true);
     }
 
     function onSettingsChanged() {
-        getSettings();
+        lastUpdate = null;
+        cacheProps();
         setColorTheme();
+        WatchUi.requestUpdate();
     }
 
     // Called when this View is brought to the foreground. Restore
@@ -130,8 +132,10 @@ class PripiatView extends WatchUi.WatchFace {
 
     // The user has just looked at their watch. Timers and animations may be started here.
     function onExitSleep() as Void {
-        getSettings();
+        lastUpdate = null;
+        cacheProps();
         setColorTheme();
+        WatchUi.requestUpdate();
     }
 
     // Terminate any active timers and prepare for slow updates.
@@ -488,7 +492,7 @@ class PripiatView extends WatchUi.WatchFace {
         }
     }
 
-    function getSettings() as Void {
+    function cacheProps() as Void {
         colorTheme = Application.Properties.getValue("colorTheme");
         drawScanlines = Application.Properties.getValue("drawScanlines");
         useRedAccent = Application.Properties.getValue("useRedAccent");
