@@ -49,6 +49,7 @@ class PripiatView extends WatchUi.WatchFace {
     var date = "";
 
     var lastUpdate = null;
+    var isSleeping = false;
 
     var colorTheme;
     var drawScanlines;
@@ -121,14 +122,16 @@ class PripiatView extends WatchUi.WatchFace {
             lastUpdate = now;
             updateMetrics();
         }
-        if (drawScanlines) {
-            drawCRTEffects(dc);
+        if (isSleeping == false) {
+            if (drawScanlines) {
+                drawCRTEffects(dc);
+            }
+            drawClockFace(dc);
+            drawProgressBars(dc);
+            drawDate(dc);
+            drawMetrics(dc);
+            drawHands(dc);
         }
-        drawClockFace(dc);
-        drawProgressBars(dc);
-        drawDate(dc);
-        drawMetrics(dc);
-        drawHands(dc);
     }
 
     // Called when this View is removed from the screen. Save the
@@ -140,6 +143,7 @@ class PripiatView extends WatchUi.WatchFace {
     // The user has just looked at their watch. Timers and animations may be started here.
     function onExitSleep() as Void {
         lastUpdate = null;
+        isSleeping = false;
         cacheProps();
         setColorTheme();
         WatchUi.requestUpdate();
@@ -147,6 +151,7 @@ class PripiatView extends WatchUi.WatchFace {
 
     // Terminate any active timers and prepare for slow updates.
     function onEnterSleep() as Void {
+        isSleeping = true;
     }
 
     /* -------- AUX FUNCTIONS -------- */
