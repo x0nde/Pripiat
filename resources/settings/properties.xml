@@ -7,7 +7,13 @@
     <property id="showYear" type="boolean">false</property>
     <property id="circleAroundTheSeconds" type="number">0</property>
     <property id="leftBarMetric" type="number">2</property>
+    <property id="leftBarRedStart" type="number">0</property>
+    <property id="leftBarRedEnd" type="number">20</property>
     <property id="topBarMetric" type="number">0</property>
+    <property id="topBarRedStart" type="number">0</property>
+    <property id="topBarRedEnd" type="number">0</property>
     <property id="rightBarMetric" type="number">1</property>
+    <property id="rightBarRedStart" type="number">80</property>
+    <property id="rightBarRedEnd" type="number">100</property>
     <property id="flipRightBar" type="boolean">true</property>
 </properties>

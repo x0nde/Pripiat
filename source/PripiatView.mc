@@ -61,6 +61,12 @@ class PripiatView extends WatchUi.WatchFace {
     var rightBarMetric;
     var leftBarMetric;
     var topBarMetric;
+    var leftBarRedStart;
+    var leftBarRedEnd;
+    var topBarRedStart;
+    var topBarRedEnd;
+    var rightBarRedStart;
+    var rightBarRedEnd;
 
     /* -------- CORE FUNCTIONS -------- */
     function initialize() {
@@ -221,7 +227,7 @@ class PripiatView extends WatchUi.WatchFace {
         var hourLength = smallClockHands ? radius * 0.4 : radius * 0.55;
         var hourEndX = centerX + (hourLength * Math.cos(hourAngle - rotationOffset));
         var hourEndY = centerY + (hourLength * Math.sin(hourAngle - rotationOffset));
-        dc.setPenWidth(6);
+        dc.setPenWidth(5);
         dc.setColor(palette1, Graphics.COLOR_TRANSPARENT);
         dc.drawLine(centerX, centerY, hourEndX, hourEndY);
 
@@ -229,9 +235,17 @@ class PripiatView extends WatchUi.WatchFace {
         var minuteLength = smallClockHands ? radius * 0.50 : radius * 0.83;
         var minuteEndX = centerX + (minuteLength * Math.cos(minuteAngle - rotationOffset));
         var minuteEndY = centerY + (minuteLength * Math.sin(minuteAngle - rotationOffset));
-        dc.setPenWidth(4);
+        dc.setPenWidth(3);
         dc.setColor(palette1, Graphics.COLOR_TRANSPARENT);
         dc.drawLine(centerX, centerY, minuteEndX, minuteEndY);
+
+        // Draw center dot
+        dc.setColor(palette1, Graphics.COLOR_TRANSPARENT);
+        dc.fillCircle(centerX, centerY, 5);
+        if (useRedAccent) {
+            dc.setColor(palette2, Graphics.COLOR_TRANSPARENT);
+            dc.fillCircle(centerX, centerY, 3);
+        }
 
         // Draw second hand
         if (showSecondHand) {
@@ -241,11 +255,18 @@ class PripiatView extends WatchUi.WatchFace {
             dc.setPenWidth(2);
             dc.setColor(useRedAccent ? palette2 : palette1, Graphics.COLOR_TRANSPARENT);
             dc.drawLine(centerX, centerY, secondEndX, secondEndY);
+
+            var conterWeightLen = radius * 0.1;
+            var conterWeightEndX = centerX + (conterWeightLen * Math.cos(secondAngle - rotationOffset  - Math.PI));
+            var conterWeightEndY = centerY + (conterWeightLen * Math.sin(secondAngle - rotationOffset  - Math.PI));
+            dc.drawLine(centerX, centerY, conterWeightEndX, conterWeightEndY);
         }
 
-        // Draw center dot
-        dc.setColor(palette1, Graphics.COLOR_TRANSPARENT);
-        dc.fillCircle(centerX, centerY, 5);
+        // Small center dot if using red colors.
+        if (useRedAccent) {
+            dc.setColor(palette1, Graphics.COLOR_TRANSPARENT);
+            dc.fillCircle(centerX, centerY, 1);
+        }
     }
 
     function drawProgressBars(dc) as Void {
@@ -257,9 +278,9 @@ class PripiatView extends WatchUi.WatchFace {
         ];
 
         // Draw the progress bars
-        drawProgressBar(dc, angles[0][0], angles[0][1], 0, 21, metricForProgressBar(leftBarMetric), false);
-        drawProgressBar(dc, angles[1][0], angles[1][1], 80, 101, metricForProgressBar(topBarMetric), false);
-        drawProgressBar(dc, angles[2][0], angles[2][1], 0, 0, metricForProgressBar(rightBarMetric), flipRightBar);
+        drawProgressBar(dc, angles[0][0], angles[0][1], leftBarRedStart, leftBarRedEnd == 0 ? 0 : leftBarRedEnd + 1, metricForProgressBar(leftBarMetric), false);
+        drawProgressBar(dc, angles[1][0], angles[1][1], topBarRedStart, topBarRedEnd == 0 ? 0 : topBarRedEnd + 1, metricForProgressBar(topBarMetric), false);
+        drawProgressBar(dc, angles[2][0], angles[2][1], rightBarRedStart, rightBarRedEnd == 0 ? 0 : rightBarRedEnd + 1, metricForProgressBar(rightBarMetric), flipRightBar);
     }
 
     function drawProgressBar(dc, startAngle, endAngle, altColorStart, altColorEnd, fill, flip) as Void { // start always have to be greater to simplify math.
@@ -517,6 +538,12 @@ class PripiatView extends WatchUi.WatchFace {
         rightBarMetric = Application.Properties.getValue("rightBarMetric");
         leftBarMetric = Application.Properties.getValue("leftBarMetric");
         topBarMetric = Application.Properties.getValue("topBarMetric");
+        leftBarRedStart = Application.Properties.getValue("leftBarRedStart");
+        leftBarRedEnd = Application.Properties.getValue("leftBarRedEnd");
+        topBarRedStart = Application.Properties.getValue("topBarRedStart");
+        topBarRedEnd = Application.Properties.getValue("topBarRedEnd");
+        rightBarRedStart = Application.Properties.getValue("rightBarRedStart");
+        rightBarRedEnd = Application.Properties.getValue("rightBarRedEnd");
     }
 
     function setColorTheme() as Void {

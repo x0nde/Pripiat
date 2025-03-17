@@ -50,6 +50,14 @@
             <listEntry value="4">Sun position</listEntry>
         </settingConfig>
     </setting>
+    
+    <setting propertyKey="@Properties.leftBarRedStart" title="Number to start a red accent in Left Bar [0~100]">
+        <settingConfig type="numeric" />
+    </setting>
+    
+    <setting propertyKey="@Properties.leftBarRedEnd" title="Number to end a red accent in Left Bar [0~100]">
+        <settingConfig type="numeric" />
+    </setting>
 
     <setting propertyKey="@Properties.topBarMetric" title="Metric for top bar">
         <settingConfig type="list">
@@ -61,6 +69,14 @@
         </settingConfig>
     </setting>
     
+    <setting propertyKey="@Properties.topBarRedStart" title="Number to start a red accent in Top Bar [0~100]">
+        <settingConfig type="numeric" />
+    </setting>
+    
+    <setting propertyKey="@Properties.topBarRedEnd" title="Number to end a red accent in Top Bar [0~100]">
+        <settingConfig type="numeric" />
+    </setting>
+    
     <setting propertyKey="@Properties.rightBarMetric" title="Metric for right bar">
         <settingConfig type="list">
             <listEntry value="0">Step goal percentage</listEntry>
@@ -69,6 +85,14 @@
             <listEntry value="3">Stress</listEntry>
             <listEntry value="4">Sun position</listEntry>
         </settingConfig>
+    </setting>
+    
+    <setting propertyKey="@Properties.rightBarRedStart" title="Number to start a red accent in Right Bar [0~100]">
+        <settingConfig type="numeric" />
+    </setting>
+    
+    <setting propertyKey="@Properties.rightBarRedEnd" title="Number to end a red accent in Right Bar [0~100]">
+        <settingConfig type="numeric" />
     </setting>
 
     <setting propertyKey="@Properties.flipRightBar" title="Invert the right bar direction (top to bottom -> bottom to top)">
