@@ -56,6 +56,7 @@ class PripiatView extends WatchUi.WatchFace {
     var circleAroundTheSeconds;
     var showSecondHand;
     var smallClockHands;
+    var showYear;
     var flipRightBar;
     var rightBarMetric;
     var leftBarMetric;
@@ -159,8 +160,15 @@ class PripiatView extends WatchUi.WatchFace {
             } else if (i % 5 == 0) { // Draw numbers at 5, 15, 25, 35, 45, 55.
                 var number = i;
                 var text = number.format("%02d");
+                if (i == 0) {
+                    text = "60";
+                }
                 dc.setColor(palette1, Graphics.COLOR_TRANSPARENT);
-                dc.drawRadialText(centerX, centerY, font20, text, Graphics.TEXT_JUSTIFY_CENTER, radiansToDegrees(angle + 2*Math.PI), radius - font20Height + 4, 0);
+                if (i == 20 || i == 25 || i == 35 || i == 40) {
+                    dc.drawRadialText(centerX, centerY, font20, text, Graphics.TEXT_JUSTIFY_CENTER, radiansToDegrees(angle + 2*Math.PI), radius - 4, 1);
+                } else {
+                    dc.drawRadialText(centerX, centerY, font20, text, Graphics.TEXT_JUSTIFY_CENTER, radiansToDegrees(angle + 2*Math.PI), radius - font20Height + 4, 0);
+                }
             } else {
 
                 var startX = centerX + (radius * Math.cos(angle));
@@ -477,11 +485,16 @@ class PripiatView extends WatchUi.WatchFace {
         }
         
         var today = Time.Gregorian.info(now, Time.FORMAT_SHORT);
-        date = Lang.format("$1$, $2$ $3$ $4$", [
+        date = showYear ? Lang.format("$1$, $2$ $3$ $4$", [
                     day_name(today.day_of_week),
                     today.day,
                     month_name(today.month),
                     today.year
+                ])
+                : Lang.format("$1$, $2$ $3$", [
+                    day_name(today.day_of_week),
+                    today.day,
+                    month_name(today.month)
                 ]);
 
         if (temp != "") {
@@ -499,6 +512,7 @@ class PripiatView extends WatchUi.WatchFace {
         circleAroundTheSeconds = Application.Properties.getValue("circleAroundTheSeconds");
         showSecondHand = Application.Properties.getValue("showSecondHand");
         smallClockHands = Application.Properties.getValue("smallClockHands");
+        showYear = Application.Properties.getValue("showYear");
         flipRightBar = Application.Properties.getValue("flipRightBar");
         rightBarMetric = Application.Properties.getValue("rightBarMetric");
         leftBarMetric = Application.Properties.getValue("leftBarMetric");

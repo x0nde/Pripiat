@@ -4,6 +4,7 @@
     <property id="useRedAccent" type="boolean">false</property>
     <property id="showSecondHand" type="boolean">true</property>
     <property id="smallClockHands" type="boolean">false</property>
+    <property id="showYear" type="boolean">false</property>
     <property id="circleAroundTheSeconds" type="number">0</property>
     <property id="leftBarMetric" type="number">2</property>
     <property id="topBarMetric" type="number">0</property>

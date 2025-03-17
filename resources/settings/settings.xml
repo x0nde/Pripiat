@@ -29,6 +29,10 @@
         <settingConfig type="boolean" />
     </setting>
 
+    <setting propertyKey="@Properties.showYear" title="Display the year in the date string">
+        <settingConfig type="boolean" />
+    </setting>
+
     <setting propertyKey="@Properties.circleAroundTheSeconds" title="Draw a circle close to the second numbers">
         <settingConfig type="list">
             <listEntry value="0">off</listEntry>
